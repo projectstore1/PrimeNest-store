@@ -143,7 +143,7 @@ async function loadProducts() {
                     return;
                 }
                 localStorage.setItem('selectedProductId', id);
-                window.location.href = 'Product-details.html';
+                window.location.href = 'product-details.html';
             });
         });
 
@@ -158,9 +158,9 @@ async function loadNotice() {
     try {
         const doc = await db.collection('settings').doc('notice').get();
         if (doc.exists) {
-            document.getElementById('paymentMethods').textContent = doc.data().text || 'bkash, Nagad, Rocket, Visa, Mastercard';
+            document.getElementById('paymentMethods').textContent = doc.data().text || 'CRYPTO PAYMENT, BEP20, SOL, USDC, NGN, PALMPAY, 9PSB';
         } else {
-            document.getElementById('paymentMethods').textContent = 'bkash, Nagad, Rocket, Visa, Mastercard';
+            document.getElementById('paymentMethods').textContent = 'crypto payment, BEP20, SOL , USDC, NGN, Palmpay, 9PSB';
         }
     } catch (error) {
         console.error('Error loading notice:', error);
