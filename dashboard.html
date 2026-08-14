@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PremiumStore Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">🏪 PremiumStore</div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="products.html"><i class="fas fa-box"></i> Products</a>
+                <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="payments.html"><i class="fas fa-credit-card"></i> Payments</a>
+                <a href="media.html"><i class="fas fa-image"></i> Media</a>
+                <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>📊 Dashboard</h1>
+                <div class="theme-toggle" id="themeToggle">🌙</div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fas fa-box" style="color:#2563eb;"></i><div><h3 id="totalProducts">0</h3><p>Products</p></div></div>
+                <div class="stat-card"><i class="fas fa-list" style="color:#8b5cf6;"></i><div><h3 id="totalItems">0</h3><p>Items</p></div></div>
+                <div class="stat-card"><i class="fas fa-shopping-cart" style="color:#22c55e;"></i><div><h3 id="totalOrders">0</h3><p>Orders</p></div></div>
+                <div class="stat-card"><i class="fas fa-dollar-sign" style="color:#eab308;"></i><div><h3 id="totalRevenue">$0</h3><p>Revenue</p></div></div>
+            </div>
+
+            <div class="recent-orders">
+                <h3>Recent Orders</h3>
+                <div id="recentOrdersList"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

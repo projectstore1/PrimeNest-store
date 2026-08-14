@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments - PremiumStore Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">🏪 PremiumStore</div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="products.html"><i class="fas fa-box"></i> Products</a>
+                <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="payments.html" class="active"><i class="fas fa-credit-card"></i> Payments</a>
+                <a href="media.html"><i class="fas fa-image"></i> Media</a>
+                <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>💳 Payment Settings</h1>
+                <div class="theme-toggle" id="themeToggle">🌙</div>
+            </header>
+
+            <div class="settings-container">
+                <div class="settings-section">
+                    <h3><i class="fab fa-bitcoin"></i> Crypto Addresses</h3>
+                    <form id="cryptoForm">
+                        <div class="form-group"><label>EVM Address</label><input type="text" id="evmAddress" value="0x2711d473156609B418Fb41d340fF361A4297D278"></div>
+                        <div class="form-group"><label>Aptos Address</label><input type="text" id="aptosAddress" value="0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218"></div>
+                        <div class="form-group"><label>Solana Address</label><input type="text" id="solanaAddress" value="H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy"></div>
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <h3><i class="fas fa-money-bill-wave"></i> Bank Details</h3>
+                    <form id="nairaForm">
+                        <div class="form-group"><label>PalmPay Account</label><input type="text" id="palmPay" value="6669361510"></div>
+                        <div class="form-group"><label>9PSB Account</label><input type="text" id="psbAccount" value="6019315948"></div>
+                        <div class="form-group"><label>Account Name</label><input type="text" id="accountName" value="BillStack / Nasfam_Pay – MD ABDULLAH"></div>
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/payments.js"></script>
+</body>
+</html>

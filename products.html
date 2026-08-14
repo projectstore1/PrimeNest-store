@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - PremiumStore Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">🏪 PremiumStore</div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="products.html" class="active"><i class="fas fa-box"></i> Products</a>
+                <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="payments.html"><i class="fas fa-credit-card"></i> Payments</a>
+                <a href="media.html"><i class="fas fa-image"></i> Media</a>
+                <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>📦 Products</h1>
+                <div class="theme-toggle" id="themeToggle">🌙</div>
+            </header>
+
+            <div class="admin-toolbar">
+                <button class="btn-add" id="addProductBtn"><i class="fas fa-plus"></i> Add Product</button>
+                <button class="btn-refresh" id="refreshBtn"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+
+            <div id="productsContainer"><div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div></div>
+
+            <!-- Modal -->
+            <div class="modal" id="productModal" style="display:none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modalTitle">Add Product</h3>
+                        <button class="modal-close" id="modalClose">&times;</button>
+                    </div>
+                    <form id="productForm">
+                        <input type="hidden" id="editProductId">
+                        <div class="form-group"><label>Name *</label><input type="text" id="productName" required></div>
+                        <div class="form-group"><label>Price (USD) *</label><input type="number" id="productPrice" step="0.01" required></div>
+                        <div class="form-group"><label>Image URL</label><input type="text" id="productImage" placeholder="https://example.com/image.jpg"></div>
+                        <div class="form-group"><label>Description</label><textarea id="productDescription" rows="3"></textarea></div>
+                        <div class="form-group"><label>Status</label>
+                            <select id="productStatus">
+                                <option value="available">Available</option>
+                                <option value="soldout">Sold Out</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+                        <button type="button" class="btn-secondary" id="modalCancel">Cancel</button>
+                    </form>
+
+                    <hr style="margin:20px 0;border-color:var(--border-color);">
+                    <h4><i class="fas fa-list"></i> Items</h4>
+                    <div id="itemsContainer"><p style="color:var(--text-muted);">Save product first</p></div>
+                    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                        <input type="text" id="itemNameInput" placeholder="Item name" style="flex:1;min-width:100px;padding:10px;border-radius:12px;border:2px solid var(--border-color);background:var(--input-bg);color:var(--text-primary);">
+                        <input type="number" id="itemPriceInput" placeholder="Price" style="width:100px;padding:10px;border-radius:12px;border:2px solid var(--border-color);background:var(--input-bg);color:var(--text-primary);">
+                        <button class="btn-add" id="addItemBtn" style="padding:10px 20px;"><i class="fas fa-plus"></i> Add</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/products.js"></script>
+</body>
+</html>

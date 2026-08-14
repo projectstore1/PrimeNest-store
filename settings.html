@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - PremiumStore Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-brand">🏪 PremiumStore</div>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <a href="products.html"><i class="fas fa-box"></i> Products</a>
+                <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
+                <a href="payments.html"><i class="fas fa-credit-card"></i> Payments</a>
+                <a href="media.html"><i class="fas fa-image"></i> Media</a>
+                <a href="settings.html" class="active"><i class="fas fa-cog"></i> Settings</a>
+            </nav>
+        </aside>
+
+        <main class="admin-main">
+            <header class="admin-header">
+                <h1>⚙️ Settings</h1>
+                <div class="theme-toggle" id="themeToggle">🌙</div>
+            </header>
+
+            <div class="settings-container">
+                <div class="settings-section">
+                    <h3><i class="fas fa-bullhorn"></i> Notice Line</h3>
+                    <form id="noticeForm">
+                        <div class="form-group"><label>Payment Methods Notice</label><input type="text" id="noticeText" placeholder="bkash, Nagad, Rocket, Visa, Mastercard"></div>
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <h3><i class="fas fa-headset"></i> Support Links</h3>
+                    <form id="supportForm">
+                        <div class="form-group"><label>Telegram Link</label><input type="text" id="telegramLink" value="https://t.me/abdullha2"></div>
+                        <div class="form-group"><label>WhatsApp Link</label><input type="text" id="whatsappLink" value="https://wa.me/message/NSIUKXADRUXJA1"></div>
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+                    </form>
+                </div>
+
+                <div class="settings-section">
+                    <h3><i class="fas fa-exchange-alt"></i> Currency</h3>
+                    <form id="currencyForm">
+                        <div class="form-group"><label>1 USD to Naira</label><input type="number" id="nairaRate" value="1440"></div>
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/settings.js"></script>
+</body>
+</html>
