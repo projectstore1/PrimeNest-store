@@ -143,7 +143,7 @@ async function loadProducts() {
                     return;
                 }
                 localStorage.setItem('selectedProductId', id);
-                window.location.href = 'product-details.html';
+                window.location.href = 'Product-details.html';
             });
         });
 
