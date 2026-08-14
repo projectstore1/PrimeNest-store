@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const product = productData ? JSON.parse(productData) : null;
 
     if (!product) {
-        window.location.href = 'index.html';
+        window.location.href = 'PrimeNest.html';
         return;
     }
 
