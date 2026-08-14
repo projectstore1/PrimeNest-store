@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order History - PremiumStore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="Assets/css/style.css">
+</head>
+<body>
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <img src="https://via.placeholder.com/40x40?text=PS" alt="PremiumStore">
+                <span>PremiumStore</span>
+            </div>
+            <nav class="nav">
+                <a href="PrimeNest.html"><i class="fas fa-home"></i> Home</a>
+                <a href="Order_history.html" class="active"><i class="fas fa-history"></i> Orders</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <h2 class="section-title"><i class="fas fa-history"></i> Latest Orders (30)</h2>
+        <div class="orders-container" id="ordersContainer">
+            <div class="loading">Loading orders...</div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="feedback-section">
+            <h2 class="section-title"><i class="fas fa-star"></i> Reviews & Feedback</h2>
+            
+            <!-- Feedback Form -->
+            <div class="feedback-form">
+                <h3>Leave a Review</h3>
+                <div class="star-rating" id="starRating">
+                    <i class="fas fa-star" data-rating="1"></i>
+                    <i class="fas fa-star" data-rating="2"></i>
+                    <i class="fas fa-star" data-rating="3"></i>
+                    <i class="fas fa-star" data-rating="4"></i>
+                    <i class="fas fa-star" data-rating="5"></i>
+                </div>
+                <input type="text" id="feedbackTwitter" placeholder="Your Twitter/X username" style="width:100%;padding:12px;border-radius:16px;border:2px solid var(--border-color);margin:8px 0;background:var(--input-bg);color:var(--text-primary);">
+                <textarea id="feedbackText" placeholder="Write your review..." rows="3" style="width:100%;padding:12px;border-radius:16px;border:2px solid var(--border-color);resize:vertical;background:var(--input-bg);color:var(--text-primary);"></textarea>
+                <button id="submitFeedback" class="btn-primary"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
+            </div>
+
+            <!-- Feedback List -->
+            <div class="feedback-list">
+                <h3>Customer Reviews</h3>
+                <div id="feedbackContainer">
+                    <p style="color:var(--text-muted);">No reviews yet. Be the first!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="Assets/js/firebase-config.js"></script>
+    <script src="Assets/js/orders.js"></script>
+</body>
+</html>

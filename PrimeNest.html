@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrimeNest store - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="Assets/css/style.css">
+</head>
+<body>
+    <!-- Dark/Light Mode Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <!-- Support Button -->
+    <div class="support-btn">
+        <a href="https://t.me/abdullha2" target="_blank">
+            <i class="fab fa-telegram-plane"></i>
+        </a>
+        <a href="https://wa.me/message/NSIUKXADRUXJA1" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <img src="https://via.placeholder.com/40x40?text=PS" alt="PremiumStore">
+                <span>PrimeNest store</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html" class="active"><i class="fas fa-home"></i> Home</a>
+                <a href="Order_history.html"><i class="fas fa-history"></i> Orders</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Banner Slider -->
+        <div class="banner-slider" id="bannerSlider">
+            <div class="slides" id="slides"></div>
+            <div class="slider-dots" id="sliderDots"></div>
+        </div>
+
+        <!-- Notice Line -->
+        <div class="notice-line" id="noticeLine">
+            <i class="fas fa-credit-card"></i>
+            <span><strong>Pay:</strong> <span id="paymentMethods">Loading...</span></span>
+            <i class="fas fa-shield-alt"></i>
+        </div>
+
+        <!-- Products -->
+        <h2 class="section-title"><i class="fas fa-tag"></i> Top Picks</h2>
+        <div class="product-grid" id="productGrid"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>Developed by Abdullha Khan <i class="fas fa-code"></i></p>
+        </div>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="Assets/js/firebase-config.js"></script>
+    <script src="Assets/js/app.js"></script>
+</body>
+</html>
