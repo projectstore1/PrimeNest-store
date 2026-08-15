@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const message = generateOrderMessage('WhatsApp');
         console.log('📤 WhatsApp message:', message);
         const encoded = encodeURIComponent(message);
-        window.open('https://wa.me/message/NSIUKXADRUXJA1?text=' + encoded, '_blank');
+        window.open('https://wa.me/message/+881874613165?text=' + encoded, '_blank');
     });
 
     // ===== DARK MODE TOGGLE =====
