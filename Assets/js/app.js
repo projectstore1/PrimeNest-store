@@ -42,15 +42,29 @@ async function loadBanners() {
         snapshot.forEach(doc => {
             const data = doc.data();
             console.log(`📢 Banner ${index + 1}:`, data.title || 'Untitled');
+            console.log('📢 Image URL:', data.image || 'No image');
+            console.log('📢 Link URL:', data.link || 'No link');
             
-            // Build slide HTML
+            // Build slide HTML with proper styling
+            let style = '';
+            if (data.image && data.image.trim() !== '') {
+                // If image exists, use image as background
+                style = `background-image: url('${data.image}'); background-size: cover; background-position: center;`;
+            } else if (data.bgColor && data.bgColor.trim() !== '') {
+                // If bgColor exists, use it
+                style = `background: ${data.bgColor};`;
+            } else {
+                // Default gradient
+                style = `background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);`;
+            }
+            
             slidesHtml += `
-                <div class="slide" style="background:${data.bgColor || 'linear-gradient(135deg,#667eea 0%,#764ba2 100%)'};">
+                <div class="slide" style="${style}">
                     <div class="slide-content">
-                        ${data.icon ? `<i class="${data.icon}"></i>` : ''}
+                        ${data.icon && !data.image ? `<i class="${data.icon}"></i>` : ''}
                         <h2>${data.title || 'PremiumStore'}</h2>
                         <p>${data.subtitle || ''}</p>
-                        ${data.link ? `<a href="${data.link}" target="_blank" style="color:white;text-decoration:underline;margin-top:10px;display:inline-block;">Learn More →</a>` : ''}
+                        ${data.link ? `<a href="${data.link}" target="_blank">Learn More →</a>` : ''}
                     </div>
                 </div>
             `;
@@ -63,8 +77,8 @@ async function loadBanners() {
         sliderDots.innerHTML = dotsHtml;
         console.log('✅ Banners loaded successfully');
         
-        // Initialize slider
-        initSlider();
+        // Initialize slider after a small delay
+        setTimeout(initSlider, 100);
 
     } catch (error) {
         console.error('❌ Error loading banners:', error);
@@ -102,7 +116,7 @@ function showDefaultBanners() {
         <button class="dot" data-index="1"></button>
         <button class="dot" data-index="2"></button>
     `;
-    initSlider();
+    setTimeout(initSlider, 100);
 }
 
 // ===== SLIDER LOGIC =====
@@ -211,7 +225,6 @@ async function loadProducts() {
                     return;
                 }
                 
-                // Save to localStorage and redirect
                 localStorage.setItem('selectedProductId', productId);
                 console.log('✅ Saved product ID to localStorage:', productId);
                 window.location.href = 'product-details.html';
