@@ -1,96 +1,161 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const container = document.getElementById('ordersContainer');
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📋 Order History page loaded');
+    console.log('📋 Fetching orders from Firebase...');
 
-    // ===== Load Orders =====
-    try {
-        const snapshot = await db.collection('orders')
-            .orderBy('createdAt', 'desc')
-            .limit(30)
-            .get();
-
-        if (snapshot.empty) {
-            container.innerHTML = `
-                <div style="text-align:center;padding:40px;color:var(--text-muted);">
-                    <i class="fas fa-box-open" style="font-size:3rem;display:block;margin-bottom:12px;"></i>
-                    <p>No orders yet.</p>
-                </div>
-            `;
-        } else {
-            let html = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const date = data.createdAt?.toDate?.() || new Date();
-                html += `
-                    <div class="order-item">
-                        <div class="order-info">
-                            <strong>${data.product || 'Product'}</strong>
-                            <span style="font-size:0.85rem;color:var(--text-muted);">
-                                ${data.item || ''} • ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
-                            </span>
-                        </div>
-                        <div style="text-align:right;">
-                            <div style="font-weight:700;color:var(--accent);">
-                                $${data.amount?.toFixed(2) || '0.00'}
-                            </div>
-                            <span class="order-status status-${data.status || 'pending'}">
-                                ${data.status || 'pending'}
-                            </span>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-    } catch (error) {
-        console.error('Error loading orders:', error);
-        container.innerHTML = `<p style="color:#dc2626;">Error loading orders: ${error.message}</p>`;
-    }
-
-    // ===== Feedback System =====
+    const ordersContainer = document.getElementById('ordersContainer');
+    const feedbackContainer = document.getElementById('feedbackContainer');
     const starRating = document.getElementById('starRating');
     const feedbackText = document.getElementById('feedbackText');
     const feedbackTwitter = document.getElementById('feedbackTwitter');
     const submitBtn = document.getElementById('submitFeedback');
-    const feedbackContainer = document.getElementById('feedbackContainer');
 
     let selectedRating = 0;
 
-    if (starRating) {
-        starRating.querySelectorAll('i').forEach(star => {
-            star.addEventListener('click', function() {
-                selectedRating = parseInt(this.dataset.rating);
-                starRating.querySelectorAll('i').forEach(s => {
-                    s.classList.toggle('active', parseInt(s.dataset.rating) <= selectedRating);
-                });
+    // ============================================================
+    // ===== LOAD ORDERS FROM FIREBASE =====
+    // ============================================================
+
+    async function loadOrders() {
+        ordersContainer.innerHTML = `
+            <div style="text-align:center;padding:40px;color:var(--text-muted);">
+                <i class="fas fa-spinner fa-spin" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
+                <p>Loading orders...</p>
+            </div>
+        `;
+
+        try {
+            // Get all orders from Firebase, sorted by latest
+            const snapshot = await db.collection('orders')
+                .orderBy('createdAt', 'desc')
+                .limit(30)
+                .get();
+
+            console.log('📋 Orders found:', snapshot.size);
+
+            if (snapshot.empty) {
+                ordersContainer.innerHTML = `
+                    <div class="empty-orders" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+                        <i class="fas fa-box-open" style="font-size:4rem;display:block;margin-bottom:16px;color:var(--border-color);"></i>
+                        <h3 style="color:var(--text-primary);margin-bottom:8px;">No Orders Yet</h3>
+                        <p>Start shopping to see your orders here!</p>
+                        <a href="index.html" class="btn-primary" style="display:inline-block;margin-top:16px;">
+                            <i class="fas fa-shopping-cart"></i> Browse Products
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            let orderCount = 0;
+            
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                orderCount++;
+                
+                // Get date from Firebase timestamp
+                let date = new Date();
+                if (data.createdAt && data.createdAt.toDate) {
+                    date = data.createdAt.toDate();
+                } else if (data.createdAt) {
+                    date = new Date(data.createdAt);
+                }
+
+                const status = data.status || 'pending';
+                const statusClass = status === 'completed' ? 'status-completed' : 
+                                   status === 'cancelled' ? 'status-cancelled' : 'status-pending';
+
+                // Display order ID or fallback
+                const orderId = data.orderId || data.id || 'N/A';
+                
+                html += `
+                    <div class="order-item">
+                        <div class="order-info">
+                            <span class="order-id">#${orderId}</span>
+                            <span class="order-product">${data.product || 'Unknown Product'}</span>
+                            <span class="order-date">
+                                <i class="far fa-calendar-alt"></i> 
+                                ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
+                            </span>
+                            ${data.item ? `<span style="font-size:0.85rem;color:var(--text-muted);">Item: ${data.item}</span>` : ''}
+                        </div>
+                        <div class="order-right">
+                            <span class="order-amount">$${data.amount?.toFixed(2) || '0.00'}</span>
+                            <span class="order-status ${statusClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                        </div>
+                    </div>
+                `;
             });
 
+            ordersContainer.innerHTML = html;
+            console.log('✅ Orders loaded successfully:', orderCount, 'orders');
+
+        } catch (error) {
+            console.error('❌ Error loading orders:', error);
+            ordersContainer.innerHTML = `
+                <div style="text-align:center;padding:40px;color:#dc2626;">
+                    <i class="fas fa-exclamation-circle" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
+                    <p>Error loading orders: ${error.message}</p>
+                    <button onclick="location.reload()" class="btn-primary" style="margin-top:12px;">
+                        <i class="fas fa-sync"></i> Retry
+                    </button>
+                </div>
+            `;
+        }
+    }
+
+    // ============================================================
+    // ===== STAR RATING =====
+    // ============================================================
+
+    if (starRating) {
+        const stars = starRating.querySelectorAll('i');
+        
+        stars.forEach(star => {
+            // Click event
+            star.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.rating);
+                stars.forEach(s => {
+                    s.classList.toggle('active', parseInt(s.dataset.rating) <= selectedRating);
+                });
+                console.log('⭐ Rating selected:', selectedRating);
+            });
+
+            // Hover events
             star.addEventListener('mouseenter', function() {
                 const rating = parseInt(this.dataset.rating);
-                starRating.querySelectorAll('i').forEach(s => {
+                stars.forEach(s => {
                     s.style.color = parseInt(s.dataset.rating) <= rating ? '#eab308' : '';
                 });
             });
 
             star.addEventListener('mouseleave', function() {
-                starRating.querySelectorAll('i').forEach(s => {
+                stars.forEach(s => {
                     s.style.color = '';
+                    if (selectedRating > 0) {
+                        s.classList.toggle('active', parseInt(s.dataset.rating) <= selectedRating);
+                    }
                 });
             });
         });
     }
 
+    // ============================================================
+    // ===== SUBMIT FEEDBACK =====
+    // ============================================================
+
     if (submitBtn) {
-        submitBtn.addEventListener('click', async () => {
+        submitBtn.addEventListener('click', async function() {
             const text = feedbackText.value.trim();
             const twitter = feedbackTwitter.value.trim() || 'Anonymous';
 
             if (!text) {
-                alert('Please write your review.');
+                alert('❌ Please write your review.');
                 return;
             }
 
             if (selectedRating === 0) {
-                alert('Please select a rating.');
+                alert('❌ Please select a rating.');
                 return;
             }
 
@@ -106,14 +171,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 feedbackTwitter.value = '';
                 selectedRating = 0;
                 starRating.querySelectorAll('i').forEach(s => s.classList.remove('active'));
-                alert('Thank you for your feedback!');
+                
+                alert('✅ Thank you for your feedback!');
                 loadFeedback();
+
             } catch (error) {
-                console.error('Error submitting feedback:', error);
-                alert('Error submitting feedback. Please try again.');
+                console.error('❌ Error submitting feedback:', error);
+                alert('❌ Error submitting feedback: ' + error.message);
             }
         });
     }
+
+    // ============================================================
+    // ===== LOAD FEEDBACK =====
+    // ============================================================
 
     async function loadFeedback() {
         if (!feedbackContainer) return;
@@ -124,8 +195,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .limit(50)
                 .get();
 
+            console.log('📋 Feedback found:', snapshot.size);
+
             if (snapshot.empty) {
-                feedbackContainer.innerHTML = '<p style="color:var(--text-muted);">No reviews yet. Be the first!</p>';
+                feedbackContainer.innerHTML = `
+                    <div style="text-align:center;padding:20px;color:var(--text-muted);">
+                        <i class="fas fa-comment" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+                        <p>No reviews yet. Be the first!</p>
+                    </div>
+                `;
                 return;
             }
 
@@ -134,39 +212,61 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const data = doc.data();
                 const date = data.createdAt?.toDate?.() || new Date();
                 const stars = '⭐'.repeat(Math.min(data.rating || 0, 5));
+                const emptyStars = '☆'.repeat(Math.max(0, 5 - (data.rating || 0)));
+
                 html += `
                     <div class="feedback-item">
                         <div class="fb-header">
-                            <span class="fb-user">${data.twitter || 'Anonymous'}</span>
-                            <span class="fb-stars">${stars}</span>
+                            <span class="fb-user">
+                                <i class="fab fa-twitter" style="color:#1DA1F2;"></i> 
+                                ${data.twitter || 'Anonymous'}
+                            </span>
+                            <span class="fb-stars">${stars}${emptyStars}</span>
                         </div>
                         <div class="fb-text">${data.text}</div>
-                        <div class="fb-date">${date.toLocaleDateString()}</div>
+                        <div class="fb-date">
+                            <i class="far fa-clock"></i> 
+                            ${date.toLocaleDateString()}
+                        </div>
                     </div>
                 `;
             });
+
             feedbackContainer.innerHTML = html;
+            console.log('✅ Feedback loaded successfully');
 
         } catch (error) {
-            console.error('Error loading feedback:', error);
+            console.error('❌ Error loading feedback:', error);
+            feedbackContainer.innerHTML = `
+                <div style="text-align:center;padding:20px;color:#dc2626;">
+                    <p>Error loading feedback: ${error.message}</p>
+                </div>
+            `;
         }
     }
 
-    loadFeedback();
+    // ============================================================
+    // ===== THEME TOGGLE =====
+    // ============================================================
 
-    // ===== Theme Toggle =====
     const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        });
-    }
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // ============================================================
+    // ===== INIT =====
+    // ============================================================
+
+    console.log('🚀 Initializing Order History page...');
+    loadOrders();
+    loadFeedback();
 });
