@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment - PremiumStore</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="Assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
     <div class="theme-toggle" id="themeToggle">
@@ -16,11 +16,11 @@
         <div class="container">
             <div class="logo">
                 <img src="https://via.placeholder.com/40x40?text=PS" alt="PremiumStore">
-                <span>PrimeNest Store</span>
+                <span>PremiumStore</span>
             </div>
             <nav class="nav">
-                <a href="PtimeNest.html"><i class="fas fa-home"></i> Home</a>
-                <a href="Order_history.html"><i class="fas fa-history"></i> Orders</a>
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="order-history.html"><i class="fas fa-history"></i> Orders</a>
             </nav>
         </div>
     </header>
@@ -34,14 +34,14 @@
                 <div class="product-info">
                     <p><strong>Product:</strong> <span id="productName">Loading...</span></p>
                     <p><strong>Item:</strong> <span id="itemName">Loading...</span></p>
-                    <p><strong>USD Price:</strong> $<span id="productPrice">0.00</span></p>
+                    <p><strong>💰 USD Price:</strong> $<span id="productPrice">0.00</span></p>
                     <p><strong>🇳🇬 Naira Price:</strong> ₦<span id="nairaPrice">0</span></p>
                 </div>
             </div>
 
             <!-- Currency Selection -->
             <div class="currency-select">
-                <h3>Select Currency</h3>
+                <h3>Select Payment Currency</h3>
                 <div class="currency-grid">
                     <div class="currency-card active" data-currency="crypto">
                         <i class="fab fa-bitcoin"></i>
@@ -64,7 +64,7 @@
                     <div class="address-box">
                         <label>EVM (BEP20 / Arbitrum / Polygon / Avalanche / Optimism)</label>
                         <div class="address-copy">
-                            <code>0x2711d473156609B418Fb41d340fF361A4297D278</code>
+                            <code id="evmAddress">0x2711d473156609B418Fb41d340fF361A4297D278</code>
                             <button class="copy-btn" data-address="0x2711d473156609B418Fb41d340fF361A4297D278">
                                 <i class="fas fa-copy"></i>
                             </button>
@@ -74,7 +74,7 @@
                     <div class="address-box">
                         <label>Aptos (USDT)</label>
                         <div class="address-copy">
-                            <code>0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218</code>
+                            <code id="aptosAddress">0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218</code>
                             <button class="copy-btn" data-address="0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218">
                                 <i class="fas fa-copy"></i>
                             </button>
@@ -84,7 +84,7 @@
                     <div class="address-box">
                         <label>Solana (USDT / USDC / SOL)</label>
                         <div class="address-copy">
-                            <code>H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy</code>
+                            <code id="solanaAddress">H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy</code>
                             <button class="copy-btn" data-address="H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy">
                                 <i class="fas fa-copy"></i>
                             </button>
@@ -99,7 +99,7 @@
                     <div class="address-box">
                         <label>🏦 PalmPay Account</label>
                         <div class="address-copy">
-                            <code>6669361510</code>
+                            <code id="palmPay">6669361510</code>
                             <button class="copy-btn" data-address="6669361510">
                                 <i class="fas fa-copy"></i>
                             </button>
@@ -109,7 +109,7 @@
                     <div class="address-box">
                         <label>🏦 9PSB Account</label>
                         <div class="address-copy">
-                            <code>6019315948</code>
+                            <code id="psbAccount">6019315948</code>
                             <button class="copy-btn" data-address="6019315948">
                                 <i class="fas fa-copy"></i>
                             </button>
@@ -119,7 +119,7 @@
                     <div class="address-box">
                         <label>Account Name</label>
                         <div class="address-copy">
-                            <code>BillStack / Nasfam_Pay – MD ABDULLAH</code>
+                            <code id="accountName">BillStack / Nasfam_Pay – MD ABDULLAH</code>
                         </div>
                     </div>
 
@@ -128,21 +128,25 @@
                         <div class="address-copy">
                             <code>• Bybit: 151723688</code>
                         </div>
-                        <div class="address-copy">
+                        <div class="address-copy" style="margin-top:6px;">
                             <code>• MEXC: 18127696</code>
                         </div>
                     </div>
                 </div>
             </div>
 
+            <div class="copy-feedback" id="copyFeedback" style="display:none;text-align:center;color:var(--success);margin:8px 0;">
+                <i class="fas fa-check-circle"></i> Address copied!
+            </div>
+
             <!-- Order Buttons -->
             <div class="order-buttons">
-                <a href="https://t.me/abdullha2" target="_blank" class="btn-order telegram">
+                <button class="btn-order telegram" id="telegramBtn">
                     <i class="fab fa-telegram-plane"></i> Order via Telegram
-                </a>
-                <a href="https://wa.me/message/NSIUKXADRUXJA1" target="_blank" class="btn-order whatsapp">
+                </button>
+                <button class="btn-order whatsapp" id="whatsappBtn">
                     <i class="fab fa-whatsapp"></i> Order via WhatsApp
-                </a>
+                </button>
             </div>
 
             <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-top:16px;">
@@ -151,9 +155,15 @@
         </div>
     </main>
 
+    <footer class="footer">
+        <div class="container">
+            <p>Developed by Abdullha Khan <i class="fas fa-code"></i></p>
+        </div>
+    </footer>
+
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="Assets/js/firebase-config.js"></script>
-    <script src="Assets/js/payment.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/payment.js"></script>
 </body>
 </html>
