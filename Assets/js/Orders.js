@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📋 Order History page loaded');
-    console.log('📋 Fetching orders from Firebase...');
+    console.log('📋 Fetching ALL orders from Firebase (old + new)...');
 
     const ordersContainer = document.getElementById('ordersContainer');
     const feedbackContainer = document.getElementById('feedbackContainer');
@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedRating = 0;
 
     // ============================================================
-    // ===== LOAD ORDERS FROM FIREBASE =====
+    // ===== LOAD ALL ORDERS FROM FIREBASE (OLD + NEW) =====
     // ============================================================
 
     async function loadOrders() {
@@ -24,13 +24,12 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
 
         try {
-            // Get all orders from Firebase, sorted by latest
             const snapshot = await db.collection('orders')
                 .orderBy('createdAt', 'desc')
-                .limit(30)
+                .limit(50)
                 .get();
 
-            console.log('📋 Orders found:', snapshot.size);
+            console.log('📋 Total orders found (old + new):', snapshot.size);
 
             if (snapshot.empty) {
                 ordersContainer.innerHTML = `
@@ -53,7 +52,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = doc.data();
                 orderCount++;
                 
-                // Get date from Firebase timestamp
                 let date = new Date();
                 if (data.createdAt && data.createdAt.toDate) {
                     date = data.createdAt.toDate();
@@ -65,7 +63,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const statusClass = status === 'completed' ? 'status-completed' : 
                                    status === 'cancelled' ? 'status-cancelled' : 'status-pending';
 
-                // Display order ID or fallback
                 const orderId = data.orderId || data.id || 'N/A';
                 
                 html += `
@@ -78,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
                             </span>
                             ${data.item ? `<span style="font-size:0.85rem;color:var(--text-muted);">Item: ${data.item}</span>` : ''}
+                            ${data.paymentMethod ? `<span style="font-size:0.85rem;color:var(--text-muted);">Payment: ${data.paymentMethod}</span>` : ''}
                         </div>
                         <div class="order-right">
                             <span class="order-amount">$${data.amount?.toFixed(2) || '0.00'}</span>
@@ -88,7 +86,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             ordersContainer.innerHTML = html;
-            console.log('✅ Orders loaded successfully:', orderCount, 'orders');
+            console.log('✅ All orders loaded successfully:', orderCount, 'orders (old + new)');
+
+            // ===== REAL-TIME LISTENER FOR NEW ORDERS =====
+            setupRealtimeOrders();
 
         } catch (error) {
             console.error('❌ Error loading orders:', error);
@@ -105,6 +106,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================================
+    // ===== REAL-TIME LISTENER FOR NEW ORDERS =====
+    // ============================================================
+
+    function setupRealtimeOrders() {
+        console.log('🔄 Setting up real-time listener for new orders...');
+
+        db.collection('orders')
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+            .onSnapshot(function(snapshot) {
+                snapshot.docChanges().forEach(function(change) {
+                    if (change.type === 'added') {
+                        console.log('🆕 New order added in real-time!');
+                        loadOrders();
+                    }
+                });
+            }, function(error) {
+                console.error('❌ Real-time listener error:', error);
+            });
+    }
+
+    // ============================================================
     // ===== STAR RATING =====
     // ============================================================
 
@@ -112,7 +135,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const stars = starRating.querySelectorAll('i');
         
         stars.forEach(star => {
-            // Click event
             star.addEventListener('click', function() {
                 selectedRating = parseInt(this.dataset.rating);
                 stars.forEach(s => {
@@ -121,7 +143,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('⭐ Rating selected:', selectedRating);
             });
 
-            // Hover events
             star.addEventListener('mouseenter', function() {
                 const rating = parseInt(this.dataset.rating);
                 stars.forEach(s => {
@@ -183,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================================
-    // ===== LOAD FEEDBACK =====
+    // ===== LOAD ALL FEEDBACK (OLD + NEW) =====
     // ============================================================
 
     async function loadFeedback() {
@@ -195,7 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .limit(50)
                 .get();
 
-            console.log('📋 Feedback found:', snapshot.size);
+            console.log('📋 Total feedback found (old + new):', snapshot.size);
 
             if (snapshot.empty) {
                 feedbackContainer.innerHTML = `
@@ -233,7 +254,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             feedbackContainer.innerHTML = html;
-            console.log('✅ Feedback loaded successfully');
+            console.log('✅ All feedback loaded successfully (old + new)');
+
+            // ===== REAL-TIME LISTENER FOR NEW FEEDBACK =====
+            setupRealtimeFeedback();
 
         } catch (error) {
             console.error('❌ Error loading feedback:', error);
@@ -243,6 +267,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             `;
         }
+    }
+
+    // ============================================================
+    // ===== REAL-TIME LISTENER FOR NEW FEEDBACK =====
+    // ============================================================
+
+    function setupRealtimeFeedback() {
+        console.log('🔄 Setting up real-time listener for new feedback...');
+
+        db.collection('feedback')
+            .orderBy('createdAt', 'desc')
+            .limit(1)
+            .onSnapshot(function(snapshot) {
+                snapshot.docChanges().forEach(function(change) {
+                    if (change.type === 'added') {
+                        console.log('🆕 New feedback added in real-time!');
+                        loadFeedback();
+                    }
+                });
+            }, function(error) {
+                console.error('❌ Real-time listener error:', error);
+            });
     }
 
     // ============================================================
