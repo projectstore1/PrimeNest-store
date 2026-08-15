@@ -5,19 +5,21 @@ document.addEventListener('DOMContentLoaded', function() {
     let productData = localStorage.getItem('selectedProduct');
     let product = null;
 
+    console.log('📦 Raw localStorage data:', productData);
+
     if (productData) {
         try {
             product = JSON.parse(productData);
-            console.log('✅ Product loaded:', product);
+            console.log('✅ Product loaded successfully:', product);
         } catch (e) {
-            console.error('Error parsing product:', e);
+            console.error('❌ Error parsing product data:', e);
         }
     }
 
     // If no product, go back to home
     if (!product) {
         console.log('❌ No product found, redirecting to home');
-        window.location.href = 'index.html';
+        window.location.href = 'PrimeNest.html';
         return;
     }
 
@@ -65,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const address = this.dataset.address;
             if (!address) return;
 
-            // Try clipboard API first
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(address).then(() => {
                     showCopyFeedback();
