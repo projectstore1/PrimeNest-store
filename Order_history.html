@@ -2,77 +2,512 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order History - PremiumStore</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Order History & Reviews - Premium Stores</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link rel="stylesheet" href="Assets/css/style.css">
+    <style>
+        /* ============================================================
+           ORDER HISTORY & REVIEWS PAGE STYLES
+           ============================================================ */
+        
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',sans-serif;background:var(--bg-primary);color:var(--text-primary);transition:all 0.3s ease;}
+        
+        .header{background:var(--header-bg);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border-bottom:2px solid var(--accent);box-shadow:var(--shadow);}
+        .logo{color:var(--accent);font-size:20px;font-weight:bold;display:flex;align-items:center;gap:8px;text-decoration:none;}
+        .logo img{height:36px;width:auto;border-radius:8px;}
+        .back-btn{background:var(--bg-primary);padding:8px 18px;border-radius:40px;color:var(--text-primary);text-decoration:none;font-size:13px;display:flex;align-items:center;gap:8px;border:1px solid var(--border-color);transition:all 0.3s ease;}
+        .back-btn:hover{background:var(--accent);color:white;border-color:var(--accent);}
+        
+        .container{max-width:1200px;margin:0 auto;padding:15px;}
+        .two-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+        @media(max-width:700px){.two-columns{grid-template-columns:1fr;}}
+        
+        .orders-section,.reviews-section{background:var(--bg-secondary);border-radius:20px;padding:18px;border:1px solid var(--border-color);box-shadow:var(--shadow);transition:all 0.3s ease;}
+        .orders-section:hover,.reviews-section:hover{box-shadow:var(--shadow-hover);}
+        
+        .section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;}
+        .section-header h2{color:var(--text-primary);font-size:18px;display:flex;align-items:center;gap:8px;}
+        .section-header h2 i{color:var(--accent);}
+        .badge{background:var(--accent);color:white;padding:4px 12px;border-radius:30px;font-size:12px;font-weight:600;}
+        
+        .filter-bar{display:flex;gap:8px;margin-bottom:15px;flex-wrap:wrap;}
+        .filter-btn{background:var(--bg-primary);border:1px solid var(--border-color);padding:5px 14px;border-radius:30px;color:var(--text-secondary);cursor:pointer;font-size:12px;transition:all 0.3s ease;font-weight:600;}
+        .filter-btn:hover{background:var(--border-color);color:var(--text-primary);}
+        .filter-btn.active{background:var(--accent);color:white;border-color:var(--accent);}
+        .refresh-btn{background:var(--bg-primary);border:1px solid var(--border-color);padding:5px 14px;border-radius:30px;color:var(--text-secondary);cursor:pointer;font-size:12px;transition:all 0.3s ease;display:flex;align-items:center;gap:6px;margin-left:auto;}
+        .refresh-btn:hover{background:var(--border-color);color:var(--text-primary);}
+        
+        .orders-list{max-height:450px;overflow-y:auto;padding-right:4px;}
+        .orders-list::-webkit-scrollbar{width:4px;}
+        .orders-list::-webkit-scrollbar-track{background:var(--bg-primary);border-radius:10px;}
+        .orders-list::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px;}
+        
+        .order-card{background:var(--bg-primary);border-radius:12px;padding:12px 16px;margin-bottom:10px;border-left:3px solid var(--accent);transition:all 0.3s ease;}
+        .order-card:hover{transform:translateX(4px);box-shadow:var(--shadow-hover);}
+        .order-header{display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:5px;}
+        .order-header strong{color:var(--accent);}
+        .order-status{padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;}
+        .status-Completed{background:#dcfce7;color:#166534;}
+        .status-Pending{background:#fef3c7;color:#92400e;}
+        .status-Cancelled{background:#fef2f2;color:#dc2626;}
+        [data-theme="dark"] .status-Completed{background:#166534;color:#dcfce7;}
+        [data-theme="dark"] .status-Pending{background:#92400e;color:#fef3c7;}
+        [data-theme="dark"] .status-Cancelled{background:#7f1d1d;color:#fecaca;}
+        .order-details{font-size:12px;color:var(--text-muted);display:flex;gap:12px;flex-wrap:wrap;}
+        
+        .review-form{background:var(--bg-primary);border-radius:16px;padding:15px;margin-bottom:18px;}
+        .review-form h3{color:var(--text-primary);font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+        .review-form h3 i{color:var(--accent);}
+        .review-form input,.review-form textarea{width:100%;padding:12px;background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:12px;color:var(--text-primary);margin-bottom:12px;font-size:13px;transition:all 0.3s ease;}
+        .review-form input:focus,.review-form textarea:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(37,99,235,0.1);}
+        .review-form input::placeholder,.review-form textarea::placeholder{color:var(--text-muted);}
+        .review-form textarea{min-height:80px;resize:vertical;}
+        .rating-stars{margin-bottom:12px;display:flex;align-items:center;gap:4px;}
+        .star-select{font-size:22px;cursor:pointer;color:var(--border-color);transition:all 0.2s ease;}
+        .star-select:hover{transform:scale(1.15);}
+        .star-select.selected{color:#f59e0b;}
+        .submit-review{background:var(--accent);color:white;border:none;padding:12px;border-radius:40px;font-weight:bold;width:100%;cursor:pointer;transition:all 0.3s ease;display:flex;align-items:center;justify-content:center;gap:8px;}
+        .submit-review:hover{background:var(--accent-hover);transform:scale(1.02);}
+        
+        .reviews-list{max-height:400px;overflow-y:auto;padding-right:4px;}
+        .reviews-list::-webkit-scrollbar{width:4px;}
+        .reviews-list::-webkit-scrollbar-track{background:var(--bg-primary);border-radius:10px;}
+        .reviews-list::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px;}
+        
+        .review-card{background:var(--bg-primary);border-radius:12px;padding:12px;margin-bottom:10px;border-bottom:1px solid var(--border-color);transition:all 0.3s ease;}
+        .review-card:hover{background:var(--border-color);}
+        .review-header{display:flex;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;}
+        .reviewer-name{font-weight:bold;color:var(--accent);font-size:13px;display:flex;align-items:center;gap:6px;}
+        .review-date{font-size:10px;color:var(--text-muted);}
+        .review-text{font-size:12px;color:var(--text-secondary);margin-top:5px;line-height:1.4;}
+        .review-rating{color:#f59e0b;font-size:12px;margin-top:3px;}
+        
+        .empty-state{text-align:center;padding:30px;color:var(--text-muted);}
+        .empty-state i{font-size:2.5rem;display:block;margin-bottom:10px;color:var(--border-color);}
+        .empty-state h3{color:var(--text-primary);margin-bottom:4px;}
+        .loading{text-align:center;padding:30px;color:var(--text-muted);}
+        .loading i{font-size:2rem;display:block;margin-bottom:10px;}
+        
+        .footer-credit{text-align:center;padding:15px;font-size:11px;color:var(--text-muted);border-top:1px solid var(--border-color);margin-top:20px;}
+        .footer-credit i{color:var(--accent);}
+        
+        .toast{position:fixed;bottom:100px;left:20px;right:20px;background:var(--bg-secondary);border-left:4px solid #22c55e;padding:12px 20px;border-radius:12px;text-align:center;display:none;z-index:300;font-size:13px;font-weight:600;color:var(--text-primary);box-shadow:var(--shadow-hover);border:1px solid var(--border-color);max-width:500px;margin:0 auto;}
+        .toast.error{border-left-color:#dc2626;}
+        
+        .theme-toggle{position:fixed;top:20px;right:20px;z-index:1000;background:var(--bg-secondary);border:2px solid var(--border-color);border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:var(--text-primary);box-shadow:var(--shadow);transition:all 0.3s ease;}
+        .theme-toggle:hover{transform:scale(1.1);box-shadow:var(--shadow-hover);}
+        
+        @media(max-width:480px){
+            .header{padding:10px;}
+            .logo{font-size:16px;}
+            .logo img{height:30px;}
+            .back-btn{font-size:11px;padding:6px 12px;}
+            .container{padding:10px;}
+            .orders-section,.reviews-section{padding:12px;border-radius:16px;}
+            .section-header h2{font-size:15px;}
+            .order-card{padding:10px 12px;}
+            .order-details{font-size:10px;gap:8px;}
+            .review-form{padding:12px;}
+            .star-select{font-size:18px;}
+            .filter-btn{font-size:10px;padding:4px 10px;}
+            .theme-toggle{top:12px;right:12px;width:40px;height:40px;font-size:1rem;}
+            .toast{font-size:12px;padding:10px 16px;bottom:80px;}
+        }
+    </style>
 </head>
 <body>
+
+    <!-- ===== THEME TOGGLE ===== -->
     <div class="theme-toggle" id="themeToggle">
         <i class="fas fa-moon"></i>
     </div>
 
-    <header class="header">
-        <div class="container">
-            <div class="logo">
-                <img src="https://via.placeholder.com/40x40?text=PS" alt="PremiumStore">
-                <span>PremiumStore</span>
-            </div>
-            <nav class="nav">
-                <a href="index.html"><i class="fas fa-home"></i> Home</a>
-                <a href="order-history.html" class="active"><i class="fas fa-history"></i> Orders</a>
-            </nav>
-        </div>
-    </header>
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <a href="#" class="logo">
+            <img src="https://via.placeholder.com/40x40?text=PS" alt="PremiumStore">
+            Premium Stores
+        </a>
+        <a href="index.html" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Back to Shop
+        </a>
+    </div>
 
-    <main class="container">
-        <h2 class="section-title"><i class="fas fa-history"></i> Latest Orders</h2>
-        <div class="orders-container" id="ordersContainer">
-            <div class="loading" style="text-align:center;padding:40px;color:var(--text-muted);">
-                <i class="fas fa-spinner fa-spin" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
-                <p>Loading orders...</p>
-            </div>
-        </div>
-
-        <!-- ===== FEEDBACK SECTION ===== -->
-        <div class="feedback-section">
-            <h2 class="section-title"><i class="fas fa-star"></i> Reviews & Feedback</h2>
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="container">
+        <div class="two-columns">
             
-            <!-- Feedback Form -->
-            <div class="feedback-form">
-                <h3>Leave a Review</h3>
-                <div class="star-rating" id="starRating">
-                    <i class="fas fa-star" data-rating="1"></i>
-                    <i class="fas fa-star" data-rating="2"></i>
-                    <i class="fas fa-star" data-rating="3"></i>
-                    <i class="fas fa-star" data-rating="4"></i>
-                    <i class="fas fa-star" data-rating="5"></i>
+            <!-- LEFT: Orders History -->
+            <div class="orders-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-history"></i> Order History</h2>
+                    <div class="badge" id="orderBadge">Latest 20 Orders</div>
                 </div>
-                <input type="text" id="feedbackTwitter" placeholder="Your Twitter/X username" style="width:100%;padding:12px;border-radius:16px;border:2px solid var(--border-color);margin:8px 0;background:var(--input-bg);color:var(--text-primary);">
-                <textarea id="feedbackText" placeholder="Write your review..." rows="3" style="width:100%;padding:12px;border-radius:16px;border:2px solid var(--border-color);resize:vertical;background:var(--input-bg);color:var(--text-primary);"></textarea>
-                <button id="submitFeedback" class="btn-primary"><i class="fas fa-paper-plane"></i> Submit Feedback</button>
-            </div>
-
-            <!-- Feedback List -->
-            <div class="feedback-list">
-                <h3>Customer Reviews</h3>
-                <div id="feedbackContainer">
-                    <p style="color:var(--text-muted);">No reviews yet. Be the first!</p>
+                <div class="filter-bar">
+                    <button class="filter-btn active" data-filter="all" onclick="filterOrders('all')">All</button>
+                    <button class="filter-btn" data-filter="Completed" onclick="filterOrders('Completed')">Completed</button>
+                    <button class="filter-btn" data-filter="Pending" onclick="filterOrders('Pending')">Pending</button>
+                    <button class="filter-btn" data-filter="Cancelled" onclick="filterOrders('Cancelled')">Cancelled</button>
+                    <button class="refresh-btn" onclick="loadOrders()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                </div>
+                <div class="orders-list" id="ordersList">
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>
                 </div>
             </div>
+            
+            <!-- RIGHT: Customer Reviews -->
+            <div class="reviews-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-star"></i> Customer Reviews</h2>
+                    <div class="badge" id="reviewCount">0 Reviews</div>
+                </div>
+                
+                <div class="review-form">
+                    <h3><i class="fas fa-pen"></i> Share Your Experience</h3>
+                    <input type="text" id="reviewerName" placeholder="Your Name *">
+                    <div class="rating-stars" id="ratingStars">
+                        <i class="far fa-star star-select" data-rating="1" onclick="setRating(1)"></i>
+                        <i class="far fa-star star-select" data-rating="2" onclick="setRating(2)"></i>
+                        <i class="far fa-star star-select" data-rating="3" onclick="setRating(3)"></i>
+                        <i class="far fa-star star-select" data-rating="4" onclick="setRating(4)"></i>
+                        <i class="far fa-star star-select" data-rating="5" onclick="setRating(5)"></i>
+                        <span style="margin-left:8px;font-size:12px;color:var(--text-muted);">Select Rating</span>
+                    </div>
+                    <textarea id="reviewText" placeholder="Write your review about our service..."></textarea>
+                    <button class="submit-review" onclick="submitReview()">
+                        <i class="fas fa-paper-plane"></i> Submit Review
+                    </button>
+                </div>
+                
+                <div class="reviews-list" id="reviewsList">
+                    <div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading reviews...</div>
+                </div>
+            </div>
+            
         </div>
-    </main>
+    </div>
 
-    <footer class="footer">
-        <div class="container">
-            <p>Developed by Abdullha Khan <i class="fas fa-code"></i></p>
-        </div>
-    </footer>
+    <!-- ===== FOOTER ===== -->
+    <div class="footer-credit">
+        Developed by Abdullha Khan <i class="fas fa-code"></i>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toastMsg" class="toast"></div>
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
 
     <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="Assets/js/firebase-config.js"></script>
-    <script src="Assets/js/Orders.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // ===== FIREBASE CONFIG =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmg5AagXdej2DgvdQ-q5Dqddbgc3Fu2oA",
+            authDomain: "premium-store-v1.firebaseapp.com",
+            projectId: "premium-store-v1",
+            storageBucket: "premium-store-v1.firebasestorage.app",
+            messagingSenderId: "838970946697",
+            appId: "1:838970946697:web:fcaecf864d91c16967c258"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ============================================================
+        // ===== THEME TOGGLE =====
+        // ============================================================
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+
+        themeToggle.addEventListener('click', function() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        });
+
+        // ============================================================
+        // ===== GLOBAL VARIABLES =====
+        // ============================================================
+        let allOrders = [];
+        let latest20Orders = [];
+        let totalOrderCount = 0;
+        let allReviews = [];
+        let currentFilter = 'all';
+        let selectedRating = 0;
+
+        // ============================================================
+        // ===== TOAST =====
+        // ============================================================
+        function showToast(msg, isError = false) {
+            let t = document.getElementById('toastMsg');
+            t.innerText = msg;
+            t.className = 'toast' + (isError ? ' error' : '');
+            t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 2500);
+        }
+
+        // ============================================================
+        // ===== ESCAPE HTML =====
+        // ============================================================
+        function escapeHtml(s) {
+            if (!s) return '';
+            return String(s).replace(/[&<>"]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                if (m === '"') return '&quot;';
+                return m;
+            });
+        }
+
+        // ============================================================
+        // ===== ORDERS =====
+        // ============================================================
+        async function loadOrders() {
+            let ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
+            try {
+                // সব অর্ডার নিচ্ছি (total count এর জন্য)
+                let allSnap = await db.collection('orders').orderBy('timestamp', 'desc').get();
+                totalOrderCount = allSnap.size;
+
+                // লেটেস্ট ২০টা অর্ডার
+                let snap = await db.collection('orders').orderBy('timestamp', 'desc').limit(20).get();
+                latest20Orders = [];
+                
+                snap.forEach(doc => {
+                    let o = doc.data();
+                    o.id = doc.id;
+                    if (o.timestamp) o.timestampDate = o.timestamp.toDate();
+                    latest20Orders.push(o);
+                });
+
+                displayOrders();
+            } catch (e) {
+                ordersList.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Error Loading Orders</h3><p>' + e.message + '</p></div>';
+                console.error(e);
+            }
+        }
+
+        function displayOrders() {
+            let ordersList = document.getElementById('ordersList');
+            let filtered = currentFilter === 'all' ? latest20Orders : latest20Orders.filter(o => (o.status || 'Completed') === currentFilter);
+
+            if (filtered.length === 0) {
+                ordersList.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><h3>No Orders Found</h3><p>Your orders will appear here</p></div>';
+                return;
+            }
+
+            ordersList.innerHTML = '';
+            filtered.forEach((order, displayIndex) => {
+                // Order ID: totalOrderCount - displayIndex (সবচেয়ে নতুন #1)
+                let actualOrderId = totalOrderCount - displayIndex;
+
+                let date = order.timestampDate ? order.timestampDate.toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                }) : 'Just now';
+
+                let status = order.status || 'Completed';
+                let price = order.price ? `$${order.price}` : '';
+
+                let div = document.createElement('div');
+                div.className = 'order-card';
+                div.innerHTML = `
+                    <div class="order-header">
+                        <span><strong>#${actualOrderId}</strong> | ${escapeHtml(order.productName || 'Product')}</span>
+                        <span class="order-status status-${status}">${status}</span>
+                    </div>
+                    <div class="order-details">
+                        <span>📅 ${date}</span>
+                        <span>⏱ ${escapeHtml(order.months || 'Standard')}</span>
+                        ${price ? `<span>💰 ${price}</span>` : ''}
+                        <span>👤 ${escapeHtml(order.customer || 'Guest')}</span>
+                    </div>
+                `;
+                ordersList.appendChild(div);
+            });
+
+            document.querySelector('.orders-section .badge').innerHTML = `Latest ${filtered.length} of ${totalOrderCount} Orders`;
+        }
+
+        functionfilterOrders(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === filter) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            displayOrders();
+        }
+
+        // ============================================================
+        // ===== REAL-TIME ORDERS LISTENER =====
+        // ============================================================
+        function setupRealtimeOrders() {
+            db.collection('orders')
+                .orderBy('timestamp', 'desc')
+                .limit(1)
+                .onSnapshot(function(snapshot) {
+                    snapshot.docChanges().forEach(function(change) {
+                        if (change.type === 'added') {
+                            console.log('🆕 New order added in real-time!');
+                            loadOrders();
+                        }
+                    });
+                }, function(error) {
+                    console.error('Real-time listener error:', error);
+                });
+        }
+
+        // ============================================================
+        // ===== REVIEWS =====
+        // ============================================================
+        function setRating(rating) {
+            selectedRating = rating;
+            let stars = document.querySelectorAll('.star-select');
+            stars.forEach((star, i) => {
+                if (i < rating) {
+                    star.className = 'fas fa-star star-select selected';
+                } else {
+                    star.className = 'far fa-star star-select';
+                }
+            });
+        }
+
+        async function submitReview() {
+            let name = document.getElementById('reviewerName').value.trim();
+            let review = document.getElementById('reviewText').value.trim();
+
+            if (!name) {
+                showToast("Please enter your name", true);
+                return;
+            }
+            if (!review) {
+                showToast("Please write your review", true);
+                return;
+            }
+            if (selectedRating === 0) {
+                showToast("Please select a rating", true);
+                return;
+            }
+
+            try {
+                await db.collection('reviews').add({
+                    name: name,
+                    review: review,
+                    rating: selectedRating,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                document.getElementById('reviewerName').value = '';
+                document.getElementById('reviewText').value = '';
+                setRating(0);
+                selectedRating = 0;
+
+                showToast("✅ Thank you for your review!");
+                loadReviews();
+
+            } catch (e) {
+                console.error("Error:", e);
+                showToast("Error: " + e.message, true);
+            }
+        }
+
+        async function loadReviews() {
+            let reviewsList = document.getElementById('reviewsList');
+            reviewsList.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading reviews...</div>';
+            try {
+                let snap = await db.collection('reviews').orderBy('timestamp', 'desc').limit(30).get();
+                allReviews = [];
+                snap.forEach(doc => {
+                    let r = doc.data();
+                    r.id = doc.id;
+                    if (r.timestamp) r.timestampDate = r.timestamp.toDate();
+                    allReviews.push(r);
+                });
+
+                document.getElementById('reviewCount').innerText = allReviews.length + ' Reviews';
+
+                if (allReviews.length === 0) {
+                    reviewsList.innerHTML = '<div class="empty-state"><i class="fas fa-comment-dots"></i><h3>No Reviews Yet</h3><p>Be the first to share your experience!</p></div>';
+                    return;
+                }
+
+                reviewsList.innerHTML = '';
+                allReviews.forEach(rev => {
+                    let date = rev.timestampDate ? rev.timestampDate.toLocaleDateString() : 'Recently';
+                    let stars = '';
+                    for (let i = 1; i <= 5; i++) {
+                        stars += i <= rev.rating ? '★' : '☆';
+                    }
+                    let div = document.createElement('div');
+                    div.className = 'review-card';
+                    div.innerHTML = `
+                        <div class="review-header">
+                            <span class="reviewer-name"><i class="fas fa-user-circle"></i> ${escapeHtml(rev.name)}</span>
+                            <span class="review-date">${date}</span>
+                        </div>
+                        <div class="review-rating">${stars}</div>
+                        <div class="review-text">"${escapeHtml(rev.review)}"</div>
+                    `;
+                    reviewsList.appendChild(div);
+                });
+            } catch (e) {
+                console.error("Error loading reviews:", e);
+                reviewsList.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h3>Error Loading Reviews</h3><p>' + e.message + '</p></div>';
+            }
+        }
+
+        // ============================================================
+        // ===== REAL-TIME REVIEWS LISTENER =====
+        // ============================================================
+        function setupRealtimeReviews() {
+            db.collection('reviews')
+                .orderBy('timestamp', 'desc')
+                .limit(1)
+                .onSnapshot(function(snapshot) {
+                    snapshot.docChanges().forEach(function(change) {
+                        if (change.type === 'added') {
+                            console.log('🆕 New review added in real-time!');
+                            loadReviews();
+                        }
+                    });
+                }, function(error) {
+                    console.error('Real-time listener error:', error);
+                });
+        }
+
+        // ============================================================
+        // ===== AUTO REFRESH =====
+        // ============================================================
+        setInterval(() => {
+            loadOrders();
+            loadReviews();
+        }, 30000);
+
+        // ============================================================
+        // ===== INIT =====
+        // ============================================================
+        window.onload = function() {
+            console.log('📋 Order History page loaded');
+            console.log('📋 Fetching ALL orders from Firebase (old + new)...');
+            loadOrders();
+            loadReviews();
+            setupRealtimeOrders();
+            setupRealtimeReviews();
+        };
+    </script>
+
 </body>
 </html>
