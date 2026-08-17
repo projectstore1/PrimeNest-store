@@ -20,7 +20,7 @@
         }
 
         .quick-container {
-            max-width: 500px;
+            max-width: 520px;
             width: 100%;
             background: #111111;
             border-radius: 24px;
@@ -61,6 +61,42 @@
             font-size: 0.75rem;
             font-weight: 600;
             margin-bottom: 16px;
+        }
+
+        /* ===== STATS ===== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .stat-box {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+        }
+
+        .stat-box .stat-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1DA1F2;
+        }
+
+        .stat-box .stat-label {
+            font-size: 0.7rem;
+            color: #888;
+            margin-top: 2px;
+        }
+
+        .stat-box.today .stat-number {
+            color: #22c55e;
+        }
+
+        .stat-box.total .stat-number {
+            color: #eab308;
         }
 
         /* ===== PLAN SELECTOR ===== */
@@ -216,7 +252,7 @@
             margin-top: 20px;
             border-top: 1px solid #333;
             padding-top: 16px;
-            max-height: 300px;
+            max-height: 320px;
             overflow-y: auto;
         }
 
@@ -261,6 +297,7 @@
 
         .order-item .order-info {
             flex: 1;
+            min-width: 0;
         }
 
         .order-item .order-info .order-id {
@@ -277,6 +314,19 @@
         .order-item .order-info .order-user {
             color: #888;
             font-size: 0.75rem;
+            word-break: break-all;
+        }
+
+        .order-item .order-info .order-date {
+            color: #555;
+            font-size: 0.65rem;
+        }
+
+        .order-item .order-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .order-item .order-status {
@@ -300,11 +350,6 @@
         .order-item .order-status.cancelled {
             background: #fef2f2;
             color: #dc2626;
-        }
-
-        .order-item .order-actions {
-            display: flex;
-            gap: 6px;
         }
 
         .order-item .order-actions button {
@@ -343,8 +388,12 @@
             .quick-header h1 {
                 font-size: 1.2rem;
             }
-            .plan-selector {
-                grid-template-columns: 1fr 1fr;
+            .stats-row {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 6px;
+            }
+            .stat-box .stat-number {
+                font-size: 1.2rem;
             }
         }
     </style>
@@ -357,6 +406,22 @@
             <span class="icon"><i class="fab fa-twitter"></i></span>
             <h1>⚡ Quick Order</h1>
             <p>X Premium - Fast Add</p>
+        </div>
+
+        <!-- ===== STATS ===== -->
+        <div class="stats-row" id="statsRow">
+            <div class="stat-box today">
+                <div class="stat-number" id="todayCount">0</div>
+                <div class="stat-label">📅 Today</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number" id="completedCount">0</div>
+                <div class="stat-label">✅ Completed</div>
+            </div>
+            <div class="stat-box total">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">📊 Total Orders</div>
+            </div>
         </div>
 
         <div style="text-align:center;">
@@ -373,10 +438,12 @@
                 <div class="plan-option active" data-plan="3 Month" data-price="6">
                     <div class="plan-name">3 Month</div>
                     <div class="plan-price">$6</div>
+                    <div class="plan-badge">🔥 Popular</div>
                 </div>
                 <div class="plan-option" data-plan="6 Month" data-price="9">
                     <div class="plan-name">6 Month</div>
                     <div class="plan-price">$9</div>
+                    <div class="plan-badge">💰 Save 33%</div>
                 </div>
             </div>
 
@@ -421,7 +488,7 @@
                 <span id="orderCount">0 orders</span>
             </h3>
             <div id="ordersContainer">
-                <div class="empty-orders">No orders yet</div>
+                <div class="empty-orders">Loading orders...</div>
             </div>
         </div>
 
