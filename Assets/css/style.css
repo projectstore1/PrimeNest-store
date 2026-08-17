@@ -188,7 +188,7 @@ body {
     border-radius: 28px;
     overflow: hidden;
     margin: 24px 0 20px;
-    box-shadow: var(--shadow);
+    box-shadow: none !important;
     background: var(--bg-secondary);
     height: auto;
 }
