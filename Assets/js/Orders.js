@@ -1,7 +1,25 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('📋 Order History page loaded');
-    console.log('📋 Fetching ALL orders from Firebase (old + new)...');
 
+    // ============================================================
+    // ===== THEME TOGGLE =====
+    // ============================================================
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+
+    themeToggle.addEventListener('click', function() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // ============================================================
+    // ===== VARIABLES =====
+    // ============================================================
     const ordersContainer = document.getElementById('ordersContainer');
     const feedbackContainer = document.getElementById('feedbackContainer');
     const starRating = document.getElementById('starRating');
@@ -12,73 +30,54 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedRating = 0;
 
     // ============================================================
-    // ===== LOAD ALL ORDERS FROM FIREBASE (OLD + NEW) =====
+    // ===== LOAD ORDERS =====
     // ============================================================
-
     async function loadOrders() {
-        ordersContainer.innerHTML = `
-            <div style="text-align:center;padding:40px;color:var(--text-muted);">
-                <i class="fas fa-spinner fa-spin" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
-                <p>Loading orders...</p>
-            </div>
-        `;
+        ordersContainer.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Loading orders...</div>';
 
         try {
             const snapshot = await db.collection('orders')
                 .orderBy('createdAt', 'desc')
-                .limit(50)
+                .limit(30)
                 .get();
-
-            console.log('📋 Total orders found (old + new):', snapshot.size);
 
             if (snapshot.empty) {
                 ordersContainer.innerHTML = `
-                    <div class="empty-orders" style="text-align:center;padding:60px 20px;color:var(--text-muted);">
-                        <i class="fas fa-box-open" style="font-size:4rem;display:block;margin-bottom:16px;color:var(--border-color);"></i>
-                        <h3 style="color:var(--text-primary);margin-bottom:8px;">No Orders Yet</h3>
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <h3>No Orders Yet</h3>
                         <p>Start shopping to see your orders here!</p>
-                        <a href="index.html" class="btn-primary" style="display:inline-block;margin-top:16px;">
-                            <i class="fas fa-shopping-cart"></i> Browse Products
-                        </a>
                     </div>
                 `;
                 return;
             }
 
             let html = '';
-            let orderCount = 0;
-            
             snapshot.forEach(doc => {
                 const data = doc.data();
-                orderCount++;
-                
-                let date = new Date();
-                if (data.createdAt && data.createdAt.toDate) {
-                    date = data.createdAt.toDate();
-                } else if (data.createdAt) {
-                    date = new Date(data.createdAt);
-                }
+                const date = data.createdAt?.toDate?.() || new Date();
+                const status = data.status || 'completed';
+                const price = data.price || 0;
 
-                const status = data.status || 'pending';
                 const statusClass = status === 'completed' ? 'status-completed' : 
                                    status === 'cancelled' ? 'status-cancelled' : 'status-pending';
 
-                const orderId = data.orderId || data.id || 'N/A';
-                
                 html += `
                     <div class="order-item">
                         <div class="order-info">
-                            <span class="order-id">#${orderId}</span>
-                            <span class="order-product">${data.product || 'Unknown Product'}</span>
+                            <span class="order-id">#${data.orderId || 'N/A'}</span>
+                            <span class="order-product">${data.productName || 'Product'}</span>
+                            <span class="order-detail">
+                                <i class="fas fa-calendar"></i> ${data.plan || 'Standard'}
+                                ${data.userInfo ? `| <i class="fas fa-user"></i> ${data.userInfo}` : ''}
+                            </span>
                             <span class="order-date">
                                 <i class="far fa-calendar-alt"></i> 
                                 ${date.toLocaleDateString()} ${date.toLocaleTimeString()}
                             </span>
-                            ${data.item ? `<span style="font-size:0.85rem;color:var(--text-muted);">Item: ${data.item}</span>` : ''}
-                            ${data.paymentMethod ? `<span style="font-size:0.85rem;color:var(--text-muted);">Payment: ${data.paymentMethod}</span>` : ''}
                         </div>
                         <div class="order-right">
-                            <span class="order-amount">$${data.amount?.toFixed(2) || '0.00'}</span>
+                            <span class="order-amount">$${price.toFixed(2)}</span>
                             <span class="order-status ${statusClass}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
                         </div>
                     </div>
@@ -86,51 +85,36 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             ordersContainer.innerHTML = html;
-            console.log('✅ All orders loaded successfully:', orderCount, 'orders (old + new)');
-
-            // ===== REAL-TIME LISTENER FOR NEW ORDERS =====
-            setupRealtimeOrders();
 
         } catch (error) {
-            console.error('❌ Error loading orders:', error);
+            console.error('Error loading orders:', error);
             ordersContainer.innerHTML = `
-                <div style="text-align:center;padding:40px;color:#dc2626;">
-                    <i class="fas fa-exclamation-circle" style="font-size:2rem;display:block;margin-bottom:12px;"></i>
-                    <p>Error loading orders: ${error.message}</p>
-                    <button onclick="location.reload()" class="btn-primary" style="margin-top:12px;">
-                        <i class="fas fa-sync"></i> Retry
-                    </button>
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h3>Error Loading Orders</h3>
+                    <p>${error.message}</p>
                 </div>
             `;
         }
     }
 
     // ============================================================
-    // ===== REAL-TIME LISTENER FOR NEW ORDERS =====
+    // ===== ESCAPE HTML =====
     // ============================================================
-
-    function setupRealtimeOrders() {
-        console.log('🔄 Setting up real-time listener for new orders...');
-
-        db.collection('orders')
-            .orderBy('createdAt', 'desc')
-            .limit(1)
-            .onSnapshot(function(snapshot) {
-                snapshot.docChanges().forEach(function(change) {
-                    if (change.type === 'added') {
-                        console.log('🆕 New order added in real-time!');
-                        loadOrders();
-                    }
-                });
-            }, function(error) {
-                console.error('❌ Real-time listener error:', error);
-            });
+    function escapeHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            if (m === '"') return '&quot;';
+            return m;
+        });
     }
 
     // ============================================================
     // ===== STAR RATING =====
     // ============================================================
-
     if (starRating) {
         const stars = starRating.querySelectorAll('i');
         
@@ -140,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 stars.forEach(s => {
                     s.classList.toggle('active', parseInt(s.dataset.rating) <= selectedRating);
                 });
-                console.log('⭐ Rating selected:', selectedRating);
             });
 
             star.addEventListener('mouseenter', function() {
@@ -164,7 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================================
     // ===== SUBMIT FEEDBACK =====
     // ============================================================
-
     if (submitBtn) {
         submitBtn.addEventListener('click', async function() {
             const text = feedbackText.value.trim();
@@ -181,11 +163,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             try {
-                await db.collection('feedback').add({
+                await db.collection('reviews').add({
                     text: text,
                     twitter: twitter,
                     rating: selectedRating,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 feedbackText.value = '';
@@ -197,31 +179,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadFeedback();
 
             } catch (error) {
-                console.error('❌ Error submitting feedback:', error);
+                console.error('Error submitting feedback:', error);
                 alert('❌ Error submitting feedback: ' + error.message);
             }
         });
     }
 
     // ============================================================
-    // ===== LOAD ALL FEEDBACK (OLD + NEW) =====
+    // ===== LOAD FEEDBACK =====
     // ============================================================
-
     async function loadFeedback() {
         if (!feedbackContainer) return;
 
         try {
-            const snapshot = await db.collection('feedback')
-                .orderBy('createdAt', 'desc')
+            const snapshot = await db.collection('reviews')
+                .orderBy('timestamp', 'desc')
                 .limit(50)
                 .get();
 
-            console.log('📋 Total feedback found (old + new):', snapshot.size);
-
             if (snapshot.empty) {
                 feedbackContainer.innerHTML = `
-                    <div style="text-align:center;padding:20px;color:var(--text-muted);">
-                        <i class="fas fa-comment" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+                    <div class="empty-state">
+                        <i class="fas fa-comment"></i>
                         <p>No reviews yet. Be the first!</p>
                     </div>
                 `;
@@ -231,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let html = '';
             snapshot.forEach(doc => {
                 const data = doc.data();
-                const date = data.createdAt?.toDate?.() || new Date();
+                const date = data.timestamp?.toDate?.() || new Date();
                 const stars = '⭐'.repeat(Math.min(data.rating || 0, 5));
                 const emptyStars = '☆'.repeat(Math.max(0, 5 - (data.rating || 0)));
 
@@ -240,11 +219,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="fb-header">
                             <span class="fb-user">
                                 <i class="fab fa-twitter" style="color:#1DA1F2;"></i> 
-                                ${data.twitter || 'Anonymous'}
+                                ${escapeHtml(data.twitter || 'Anonymous')}
                             </span>
                             <span class="fb-stars">${stars}${emptyStars}</span>
                         </div>
-                        <div class="fb-text">${data.text}</div>
+                        <div class="fb-text">${escapeHtml(data.text)}</div>
                         <div class="fb-date">
                             <i class="far fa-clock"></i> 
                             ${date.toLocaleDateString()}
@@ -254,15 +233,12 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             feedbackContainer.innerHTML = html;
-            console.log('✅ All feedback loaded successfully (old + new)');
-
-            // ===== REAL-TIME LISTENER FOR NEW FEEDBACK =====
-            setupRealtimeFeedback();
 
         } catch (error) {
-            console.error('❌ Error loading feedback:', error);
+            console.error('Error loading feedback:', error);
             feedbackContainer.innerHTML = `
-                <div style="text-align:center;padding:20px;color:#dc2626;">
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-circle"></i>
                     <p>Error loading feedback: ${error.message}</p>
                 </div>
             `;
@@ -270,49 +246,16 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================================
-    // ===== REAL-TIME LISTENER FOR NEW FEEDBACK =====
+    // ===== AUTO REFRESH =====
     // ============================================================
-
-    function setupRealtimeFeedback() {
-        console.log('🔄 Setting up real-time listener for new feedback...');
-
-        db.collection('feedback')
-            .orderBy('createdAt', 'desc')
-            .limit(1)
-            .onSnapshot(function(snapshot) {
-                snapshot.docChanges().forEach(function(change) {
-                    if (change.type === 'added') {
-                        console.log('🆕 New feedback added in real-time!');
-                        loadFeedback();
-                    }
-                });
-            }, function(error) {
-                console.error('❌ Real-time listener error:', error);
-            });
-    }
-
-    // ============================================================
-    // ===== THEME TOGGLE =====
-    // ============================================================
-
-    const themeToggle = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-
-    themeToggle.addEventListener('click', function() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    });
+    setInterval(() => {
+        loadOrders();
+        loadFeedback();
+    }, 30000);
 
     // ============================================================
     // ===== INIT =====
     // ============================================================
-
-    console.log('🚀 Initializing Order History page...');
     loadOrders();
     loadFeedback();
 });
