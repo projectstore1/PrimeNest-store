@@ -182,21 +182,19 @@ body {
     color: white;
 }
 
-/* ===== BANNER SLIDER ===== */
+/* ===== BANNER SLIDER (Clear) ===== */
 .banner-slider {
     position: relative;
-    border-radius: 28px;
+    border-radius: 16px;
     overflow: hidden;
-    margin: 24px 0 20px;
-    box-shadow: none !important;
-    background: var(--bg-secondary);
-    height: auto;
+    margin: 20px 0 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    background: #000;
 }
 
 .slides {
     display: flex;
     transition: transform 0.6s ease-in-out;
-    will-change: transform;
 }
 
 .slide {
@@ -208,20 +206,14 @@ body {
     padding: 40px 20px;
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
     position: relative;
-    width: 100%;
 }
 
-/* Dark overlay for text readability on images */
+/* ===== কোন Overlay নাই - Banner পুরোপুরি Clear ===== */
+.slide::before,
 .slide::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.35);
-    border-radius: 28px;
+    display: none;
 }
 
 .slide-content {
@@ -229,83 +221,63 @@ body {
     color: white;
     position: relative;
     z-index: 2;
-    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
     max-width: 80%;
     padding: 20px;
-}
-
-.slide-content i {
-    font-size: 3.5rem;
-    margin-bottom: 12px;
-    display: block;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.7);
 }
 
 .slide-content h2 {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
     font-weight: 700;
     margin-bottom: 8px;
-    letter-spacing: 0.5px;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.8);
 }
 
 .slide-content p {
     font-size: 1.2rem;
-    opacity: 0.95;
-    margin-bottom: 6px;
-}
-
-.slide-content a {
-    color: white;
-    text-decoration: none;
-    margin-top: 12px;
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.2);
-    padding: 10px 28px;
-    border-radius: 30px;
-    backdrop-filter: blur(5px);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    transition: all 0.3s ease;
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.slide-content a:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: scale(1.05);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    text-shadow: 0 2px 20px rgba(0,0,0,0.7);
 }
 
 .slider-dots {
     position: absolute;
-    bottom: 20px;
+    bottom: 16px;
     left: 0;
     width: 100%;
     display: flex;
     justify-content: center;
-    gap: 14px;
+    gap: 12px;
     z-index: 5;
 }
 
 .dot {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255,255,255,0.5);
+    border: 2px solid rgba(255,255,255,0.2);
     cursor: pointer;
     transition: all 0.3s ease;
-    padding: 0;
 }
 
 .dot.active {
     background: white;
-    width: 32px;
+    width: 28px;
     border-radius: 20px;
     border-color: white;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
-.dot:hover {
-    transform: scale(1.2);
+@media (max-width: 768px) {
+    .slide { min-height: 200px; }
+    .slide-content h2 { font-size: 1.6rem; }
+    .slide-content p { font-size: 1rem; }
+}
+
+@media (max-width: 480px) {
+    .slide { min-height: 160px; }
+    .slide-content h2 { font-size: 1.2rem; }
+    .slide-content p { font-size: 0.85rem; }
+    .dot { width: 8px; height: 8px; }
+    .dot.active { width: 20px; }
 }
 
 /* ===== RESPONSIVE BANNER ===== */
