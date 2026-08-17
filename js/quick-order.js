@@ -54,6 +54,54 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================================
+    // ===== UPDATE STATS =====
+    // ============================================================
+    async function updateStats() {
+        try {
+            // Get today's date (start of day)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Get all orders
+            const snapshot = await db.collection('orders')
+                .where('productId', '==', 'x-premium')
+                .get();
+
+            let total = 0;
+            let completed = 0;
+            let todayCount = 0;
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                total++;
+
+                if (data.status === 'completed') {
+                    completed++;
+                }
+
+                // Check if order was created today
+                if (data.createdAt) {
+                    const orderDate = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+                    orderDate.setHours(0, 0, 0, 0);
+                    if (orderDate.getTime() === today.getTime()) {
+                        todayCount++;
+                    }
+                }
+            });
+
+            // Update UI
+            document.getElementById('todayCount').textContent = todayCount;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+
+            console.log('📊 Stats updated:', { total, completed, todayCount });
+
+        } catch (error) {
+            console.error('Error updating stats:', error);
+        }
+    }
+
+    // ============================================================
     // ===== LOAD ORDERS =====
     // ============================================================
     async function loadOrders() {
@@ -64,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const snapshot = await db.collection('orders')
                 .where('productId', '==', 'x-premium')
                 .orderBy('createdAt', 'desc')
-                .limit(10)
+                .limit(20)
                 .get();
 
             if (snapshot.empty) {
@@ -84,14 +132,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 const status = data.status || 'completed';
                 const price = data.price || 0;
 
+                // Format date
+                let dateStr = 'Just now';
+                if (data.createdAt) {
+                    const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+                    dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
                 html += `
                     <div class="order-item" data-id="${doc.id}">
                         <div class="order-info">
                             <div class="order-id">#${data.orderId || 'N/A'}</div>
                             <div class="order-plan">${data.plan || '3 Month'} - $${price.toFixed(2)}</div>
                             <div class="order-user">${data.userInfo || 'No user'}</div>
+                            <div class="order-date">${dateStr}</div>
                         </div>
-                        <div style="display:flex;align-items:center;gap:8px;">
+                        <div class="order-right">
                             <span class="order-status ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
                             <div class="order-actions">
                                 <button class="btn-delete" onclick="deleteOrder('${doc.id}')" title="Delete Order">
@@ -121,7 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             await db.collection('orders').doc(orderId).delete();
             console.log('✅ Order deleted:', orderId);
+            // Refresh everything
             loadOrders();
+            updateStats();
         } catch (error) {
             console.error('❌ Error deleting:', error);
             alert('Error deleting order: ' + error.message);
@@ -184,7 +242,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 3000);
 
             console.log('✅ Order added:', data);
+            
+            // Refresh everything
             loadOrders();
+            updateStats();
 
         } catch (error) {
             console.error('❌ Error:', error);
@@ -199,6 +260,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // ===== INIT =====
     // ============================================================
     loadOrders();
+    updateStats();
+
+    // Auto refresh every 30 seconds
+    setInterval(() => {
+        loadOrders();
+        updateStats();
+    }, 30000);
 
     console.log('✅ Quick Order ready!');
 });
