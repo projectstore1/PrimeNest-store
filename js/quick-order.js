@@ -54,6 +54,81 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================================
+    // ===== LOAD ORDERS =====
+    // ============================================================
+    async function loadOrders() {
+        const container = document.getElementById('ordersContainer');
+        const countEl = document.getElementById('orderCount');
+
+        try {
+            const snapshot = await db.collection('orders')
+                .where('productId', '==', 'x-premium')
+                .orderBy('createdAt', 'desc')
+                .limit(10)
+                .get();
+
+            if (snapshot.empty) {
+                container.innerHTML = '<div class="empty-orders">No orders yet</div>';
+                countEl.textContent = '0 orders';
+                return;
+            }
+
+            let html = '';
+            let count = 0;
+
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                data.id = doc.id;
+                count++;
+
+                const status = data.status || 'completed';
+                const price = data.price || 0;
+
+                html += `
+                    <div class="order-item" data-id="${doc.id}">
+                        <div class="order-info">
+                            <div class="order-id">#${data.orderId || 'N/A'}</div>
+                            <div class="order-plan">${data.plan || '3 Month'} - $${price.toFixed(2)}</div>
+                            <div class="order-user">${data.userInfo || 'No user'}</div>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span class="order-status ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                            <div class="order-actions">
+                                <button class="btn-delete" onclick="deleteOrder('${doc.id}')" title="Delete Order">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+            countEl.textContent = count + ' orders';
+
+        } catch (error) {
+            console.error('Error loading orders:', error);
+            container.innerHTML = '<div class="empty-orders">Error loading orders</div>';
+        }
+    }
+
+    // ============================================================
+    // ===== DELETE ORDER =====
+    // ============================================================
+    window.deleteOrder = async function(orderId) {
+        if (!confirm('Delete this order?')) return;
+
+        try {
+            await db.collection('orders').doc(orderId).delete();
+            console.log('✅ Order deleted:', orderId);
+            loadOrders();
+        } catch (error) {
+            console.error('❌ Error deleting:', error);
+            alert('Error deleting order: ' + error.message);
+        }
+    };
+
+    // ============================================================
     // ===== SUBMIT ORDER =====
     // ============================================================
     const form = document.getElementById('quickOrderForm');
@@ -109,6 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 3000);
 
             console.log('✅ Order added:', data);
+            loadOrders();
 
         } catch (error) {
             console.error('❌ Error:', error);
@@ -118,6 +194,11 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-bolt"></i> Add Order';
     });
+
+    // ============================================================
+    // ===== INIT =====
+    // ============================================================
+    loadOrders();
 
     console.log('✅ Quick Order ready!');
 });
