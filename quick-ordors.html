@@ -10,15 +10,23 @@
         /* ============================================================
            QUICK ORDER PAGE EXTRA STYLES
            ============================================================ */
+        body {
+            background: #0a0a0a !important;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
         .quick-container {
-            max-width: 420px;
+            max-width: 500px;
             width: 100%;
-            margin: 0 auto;
-            background: var(--bg-secondary);
+            background: #111111;
             border-radius: 24px;
             padding: 24px 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
+            border: 1px solid #222;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
         }
 
         .quick-header {
@@ -35,19 +43,19 @@
 
         .quick-header h1 {
             font-size: 1.4rem;
-            color: var(--text-primary);
+            color: #ffffff;
             font-weight: 700;
         }
 
         .quick-header p {
-            color: var(--text-muted);
+            color: #888;
             font-size: 0.85rem;
         }
 
         .product-badge {
             display: inline-block;
             background: #1DA1F2;
-            color: white;
+            color: #000;
             padding: 4px 16px;
             border-radius: 30px;
             font-size: 0.75rem;
@@ -58,16 +66,16 @@
         /* ===== PLAN SELECTOR ===== */
         .plan-selector {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin: 12px 0 18px;
         }
 
         .plan-option {
-            background: var(--bg-primary);
-            border: 2px solid var(--border-color);
+            background: #1a1a1a;
+            border: 2px solid #333;
             border-radius: 14px;
-            padding: 14px 8px;
+            padding: 16px 8px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -79,20 +87,20 @@
 
         .plan-option.active {
             border-color: #1DA1F2;
-            background: var(--notice-bg);
+            background: #1a2a3a;
             box-shadow: 0 0 0 3px rgba(29, 161, 242, 0.15);
         }
 
         .plan-option .plan-name {
             font-weight: 700;
-            color: var(--text-primary);
-            font-size: 0.9rem;
+            color: #ffffff;
+            font-size: 0.95rem;
         }
 
         .plan-option .plan-price {
             font-weight: 700;
             color: #1DA1F2;
-            font-size: 1rem;
+            font-size: 1.1rem;
             margin-top: 2px;
         }
 
@@ -114,7 +122,7 @@
         .form-group label {
             display: block;
             font-weight: 600;
-            color: var(--text-secondary);
+            color: #aaa;
             font-size: 0.85rem;
             margin-bottom: 4px;
         }
@@ -128,10 +136,10 @@
         .form-group select {
             width: 100%;
             padding: 12px 14px;
-            border: 2px solid var(--border-color);
+            border: 2px solid #333;
             border-radius: 12px;
-            background: var(--input-bg);
-            color: var(--text-primary);
+            background: #1a1a1a;
+            color: #ffffff;
             font-size: 0.95rem;
             transition: all 0.2s;
         }
@@ -143,7 +151,7 @@
         }
 
         .form-group input::placeholder {
-            color: var(--text-muted);
+            color: #666;
         }
 
         .form-row {
@@ -152,12 +160,12 @@
             gap: 10px;
         }
 
-        /* ===== SUBMIT BUTTON ===== */
+        /* ===== BUTTONS ===== */
         .btn-submit {
             width: 100%;
             padding: 14px;
             background: #1DA1F2;
-            color: white;
+            color: #000;
             border: none;
             border-radius: 60px;
             font-size: 1rem;
@@ -203,13 +211,129 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ===== ORDERS LIST ===== */
+        .orders-list {
+            margin-top: 20px;
+            border-top: 1px solid #333;
+            padding-top: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .orders-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .orders-list::-webkit-scrollbar-track {
+            background: #1a1a1a;
+            border-radius: 10px;
+        }
+
+        .orders-list::-webkit-scrollbar-thumb {
+            background: #1DA1F2;
+            border-radius: 10px;
+        }
+
+        .orders-list h3 {
+            color: #ffffff;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .orders-list h3 span {
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        .order-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-item .order-info {
+            flex: 1;
+        }
+
+        .order-item .order-info .order-id {
+            font-weight: 700;
+            color: #1DA1F2;
+            font-size: 0.85rem;
+        }
+
+        .order-item .order-info .order-plan {
+            color: #ffffff;
+            font-size: 0.8rem;
+        }
+
+        .order-item .order-info .order-user {
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        .order-item .order-status {
+            font-size: 0.65rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .order-item .order-status.completed {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .order-item .order-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .order-item .order-status.cancelled {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .order-item .order-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .order-item .order-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #888;
+            font-size: 0.9rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .order-item .order-actions .btn-delete:hover {
+            color: #ff4444;
+            background: #2a1a1a;
+        }
+
+        .empty-orders {
+            color: #666;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+        }
+
         /* ============================================================
            RESPONSIVE
            ============================================================ */
         @media (max-width: 400px) {
-            .plan-selector {
-                grid-template-columns: 1fr 1fr;
-            }
             .form-row {
                 grid-template-columns: 1fr;
             }
@@ -219,103 +343,86 @@
             .quick-header h1 {
                 font-size: 1.2rem;
             }
-        }
-
-        @media (max-width: 350px) {
             .plan-selector {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
             }
-        }
-
-        /* ===== DARK MODE OVERRIDE ===== */
-        [data-theme="dark"] .plan-option.active {
-            border-color: #3b82f6;
-            background: #1e293b;
-        }
-
-        [data-theme="dark"] .btn-submit {
-            background: #3b82f6;
-        }
-
-        [data-theme="dark"] .product-badge {
-            background: #3b82f6;
         }
     </style>
 </head>
 <body>
 
-    <div style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding:16px;background:var(--bg-primary);">
-        
-        <div class="quick-container">
+    <div class="quick-container">
 
-            <div class="quick-header">
-                <span class="icon"><i class="fab fa-twitter"></i></span>
-                <h1>⚡ Quick Order</h1>
-                <p>X Premium - Fast Add</p>
-            </div>
+        <div class="quick-header">
+            <span class="icon"><i class="fab fa-twitter"></i></span>
+            <h1>⚡ Quick Order</h1>
+            <p>X Premium - Fast Add</p>
+        </div>
 
-            <div style="text-align:center;">
-                <span class="product-badge">🔥 Most Ordered</span>
-            </div>
+        <div style="text-align:center;">
+            <span class="product-badge">🔥 Most Ordered</span>
+        </div>
 
-            <form id="quickOrderForm">
+        <form id="quickOrderForm">
 
-                <!-- Plan Selection -->
-                <label style="font-weight:600;color:var(--text-secondary);font-size:0.85rem;display:block;margin-bottom:6px;">
-                    <i class="fas fa-calendar"></i> Select Plan
-                </label>
-                <div class="plan-selector" id="planSelector">
-                    <div class="plan-option active" data-plan="3 Month" data-price="9.99">
-                        <div class="plan-name">3 Month</div>
-                        <div class="plan-price">$9.99</div>
-                        <div class="plan-badge">🔥 Popular</div>
-                    </div>
-                    <div class="plan-option" data-plan="6 Month" data-price="17.99">
-                        <div class="plan-name">6 Month</div>
-                        <div class="plan-price">$17.99</div>
-                        <div class="plan-badge">💰 Save 10%</div>
-                    </div>
-                    <div class="plan-option" data-plan="12 Month" data-price="29.99">
-                        <div class="plan-name">12 Month</div>
-                        <div class="plan-price">$29.99</div>
-                        <div class="plan-badge">⭐ Best Value</div>
-                    </div>
+            <!-- Plan Selection -->
+            <label style="font-weight:600;color:#aaa;font-size:0.85rem;display:block;margin-bottom:6px;">
+                <i class="fas fa-calendar"></i> Select Plan
+            </label>
+            <div class="plan-selector" id="planSelector">
+                <div class="plan-option active" data-plan="3 Month" data-price="6">
+                    <div class="plan-name">3 Month</div>
+                    <div class="plan-price">$6</div>
                 </div>
+                <div class="plan-option" data-plan="6 Month" data-price="9">
+                    <div class="plan-name">6 Month</div>
+                    <div class="plan-price">$9</div>
+                </div>
+            </div>
 
-                <input type="hidden" id="selectedPlan" value="3 Month">
-                <input type="hidden" id="selectedPrice" value="9.99">
+            <input type="hidden" id="selectedPlan" value="3 Month">
+            <input type="hidden" id="selectedPrice" value="6">
 
-                <!-- User Info -->
+            <!-- User Info -->
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> X Username / Profile Link *</label>
+                <input type="text" id="userInfo" placeholder="@username or profile link" required>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
-                    <label><i class="fas fa-user"></i> X Username / Profile Link *</label>
-                    <input type="text" id="userInfo" placeholder="@username or profile link" required>
+                    <label><i class="fas fa-tag"></i> Price (USD)</label>
+                    <input type="number" id="orderPrice" step="0.01" value="6">
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label><i class="fas fa-tag"></i> Price (USD)</label>
-                        <input type="number" id="orderPrice" step="0.01" value="9.99">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-check-circle"></i> Status</label>
-                        <select id="orderStatus">
-                            <option value="completed">✅ Completed</option>
-                            <option value="pending">⏳ Pending</option>
-                            <option value="cancelled">❌ Cancelled</option>
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label><i class="fas fa-check-circle"></i> Status</label>
+                    <select id="orderStatus">
+                        <option value="completed">✅ Completed</option>
+                        <option value="pending">⏳ Pending</option>
+                        <option value="cancelled">❌ Cancelled</option>
+                    </select>
                 </div>
+            </div>
 
-                <button type="submit" class="btn-submit" id="submitBtn">
-                    <i class="fas fa-bolt"></i> Add Order
-                </button>
+            <button type="submit" class="btn-submit" id="submitBtn">
+                <i class="fas fa-bolt"></i> Add Order
+            </button>
 
-                <div class="success-msg" id="successMsg">
-                    <i class="fas fa-check-circle"></i> Order added successfully!
-                </div>
+            <div class="success-msg" id="successMsg">
+                <i class="fas fa-check-circle"></i> Order added successfully!
+            </div>
 
-            </form>
+        </form>
 
+        <!-- ===== RECENT ORDERS ===== -->
+        <div class="orders-list" id="ordersList">
+            <h3>
+                <span><i class="fas fa-clock"></i> Recent Orders</span>
+                <span id="orderCount">0 orders</span>
+            </h3>
+            <div id="ordersContainer">
+                <div class="empty-orders">No orders yet</div>
+            </div>
         </div>
 
     </div>
