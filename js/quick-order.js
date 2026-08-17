@@ -87,15 +87,13 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('completedCount').textContent = completed;
             document.getElementById('totalCount').textContent = total;
 
-            console.log('📊 Stats updated:', { total, completed, todayCount });
-
         } catch (error) {
             console.error('Error updating stats:', error);
         }
     }
 
     // ============================================================
-    // ===== LOAD ORDERS (হিস্টোরি) =====
+    // ===== LOAD ORDERS =====
     // ============================================================
     async function loadOrders() {
         const container = document.getElementById('ordersContainer');
@@ -184,14 +182,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitBtn = document.getElementById('submitBtn');
     const successMsg = document.getElementById('successMsg');
 
-    form.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    // Remove any existing event listeners
+    form.removeEventListener('submit', handleSubmit);
+    form.addEventListener('submit', handleSubmit);
 
-        const plan = selectedPlanInput.value;
-        const price = parseFloat(orderPriceInput.value);
+    async function handleSubmit(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log('📤 Submit button clicked');
+
+        const plan = document.getElementById('selectedPlan').value;
+        const price = parseFloat(document.getElementById('orderPrice').value);
         const userInfo = document.getElementById('userInfo').value.trim();
         const status = document.getElementById('orderStatus').value;
 
+        console.log('📋 Form data:', { plan, price, userInfo, status });
+
+        // Validation
         if (!userInfo) {
             alert('❌ Please enter X username or profile link.');
             return;
@@ -202,6 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
+        // Disable button
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
@@ -221,30 +230,37 @@ document.addEventListener('DOMContentLoaded', function() {
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
+            console.log('📤 Saving order:', data);
+
             await db.collection('orders').add(data);
 
+            // Show success
             successMsg.classList.add('show');
             successMsg.innerHTML = '<i class="fas fa-check-circle"></i> Order #' + orderId + ' added!';
 
+            // Clear input
             document.getElementById('userInfo').value = '';
 
+            // Hide success after 3 seconds
             setTimeout(() => {
                 successMsg.classList.remove('show');
             }, 3000);
 
-            console.log('✅ Order added:', data);
+            // Refresh lists
+            await loadOrders();
+            await updateStats();
 
-            loadOrders();
-            updateStats();
+            console.log('✅ Order added successfully:', orderId);
 
         } catch (error) {
             console.error('❌ Error:', error);
-            alert('❌ Error: ' + error.message);
+            alert('❌ Error adding order: ' + error.message);
         }
 
+        // Enable button
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-bolt"></i> Add Order';
-    });
+    }
 
     // ============================================================
     // ===== INIT =====
