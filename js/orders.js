@@ -79,6 +79,45 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================================
+    // ===== GENERATE ORDER ID =====
+    // ============================================================
+    async function generateOrderId() {
+        try {
+            // Try to get counter from Firebase
+            const counterDoc = await db.collection('settings').doc('orderCounter').get();
+            
+            if (counterDoc.exists) {
+                // Counter exists, increment it
+                const currentCounter = counterDoc.data().counter || 0;
+                const newCounter = currentCounter + 1;
+                
+                // Update counter in Firebase
+                await db.collection('settings').doc('orderCounter').set({
+                    counter: newCounter
+                }, { merge: true });
+                
+                return newCounter;
+            } else {
+                // Counter doesn't exist, create it with starting value
+                // First, get total orders count
+                const ordersSnap = await db.collection('orders').get();
+                const totalOrders = ordersSnap.size;
+                const startCounter = totalOrders + 1;
+                
+                await db.collection('settings').doc('orderCounter').set({
+                    counter: startCounter
+                });
+                
+                return startCounter;
+            }
+        } catch (error) {
+            console.error('Error generating order ID:', error);
+            // Fallback: use timestamp based ID
+            return Date.now().toString().slice(-6);
+        }
+    }
+
+    // ============================================================
     // ===== LOAD ORDERS =====
     // ============================================================
     async function loadOrders() {
@@ -271,12 +310,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 await db.collection('orders').doc(editId).update(data);
                 alert('✅ Order updated!');
             } else {
-                const countSnap = await db.collection('orders').get();
-                const nextId = countSnap.size + 1;
-                data.orderId = nextId;
+                // Generate unique Order ID
+                const orderId = await generateOrderId();
+                data.orderId = orderId;
                 data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                
                 await db.collection('orders').add(data);
-                alert('✅ Order added!');
+                alert('✅ Order added! Order ID: #' + orderId);
             }
             document.getElementById('orderModal').style.display = 'none';
             loadOrders();
