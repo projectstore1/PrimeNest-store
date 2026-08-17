@@ -1,9 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('⚡ Quick Order loaded');
 
-    // ============================================================
-    // ===== FIREBASE =====
-    // ============================================================
     const db = firebase.firestore();
 
     // ============================================================
@@ -58,11 +55,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // ============================================================
     async function updateStats() {
         try {
-            // Get today's date (start of day)
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            // Get all orders
             const snapshot = await db.collection('orders')
                 .where('productId', '==', 'x-premium')
                 .get();
@@ -79,7 +74,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     completed++;
                 }
 
-                // Check if order was created today
                 if (data.createdAt) {
                     const orderDate = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
                     orderDate.setHours(0, 0, 0, 0);
@@ -89,7 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            // Update UI
             document.getElementById('todayCount').textContent = todayCount;
             document.getElementById('completedCount').textContent = completed;
             document.getElementById('totalCount').textContent = total;
@@ -102,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================================
-    // ===== LOAD ORDERS =====
+    // ===== LOAD ORDERS (হিস্টোরি) =====
     // ============================================================
     async function loadOrders() {
         const container = document.getElementById('ordersContainer');
@@ -116,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .get();
 
             if (snapshot.empty) {
-                container.innerHTML = '<div class="empty-orders">No orders yet</div>';
+                container.innerHTML = '<div class="empty-orders">📭 No orders yet</div>';
                 countEl.textContent = '0 orders';
                 return;
             }
@@ -132,7 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const status = data.status || 'completed';
                 const price = data.price || 0;
 
-                // Format date
                 let dateStr = 'Just now';
                 if (data.createdAt) {
                     const date = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
@@ -144,8 +136,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="order-info">
                             <div class="order-id">#${data.orderId || 'N/A'}</div>
                             <div class="order-plan">${data.plan || '3 Month'} - $${price.toFixed(2)}</div>
-                            <div class="order-user">${data.userInfo || 'No user'}</div>
-                            <div class="order-date">${dateStr}</div>
+                            <div class="order-user">👤 ${data.userInfo || 'No user'}</div>
+                            <div class="order-date">🕐 ${dateStr}</div>
                         </div>
                         <div class="order-right">
                             <span class="order-status ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
@@ -164,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Error loading orders:', error);
-            container.innerHTML = '<div class="empty-orders">Error loading orders</div>';
+            container.innerHTML = '<div class="empty-orders">❌ Error loading orders</div>';
         }
     }
 
@@ -177,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function() {
         try {
             await db.collection('orders').doc(orderId).delete();
             console.log('✅ Order deleted:', orderId);
-            // Refresh everything
             loadOrders();
             updateStats();
         } catch (error) {
@@ -242,8 +233,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 3000);
 
             console.log('✅ Order added:', data);
-            
-            // Refresh everything
+
             loadOrders();
             updateStats();
 
@@ -262,7 +252,6 @@ document.addEventListener('DOMContentLoaded', function() {
     loadOrders();
     updateStats();
 
-    // Auto refresh every 30 seconds
     setInterval(() => {
         loadOrders();
         updateStats();
