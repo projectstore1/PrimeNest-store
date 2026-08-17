@@ -6,6 +6,66 @@
     <title>Orders - PremiumStore Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="cs/admin.css">
+    <style>
+        /* ===== ORDER MANAGEMENT EXTRA STYLES ===== */
+        .order-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .order-stat-card {
+            background: var(--bg-secondary);
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+        .order-stat-card h4 {
+            font-size: 1.5rem;
+            color: var(--accent);
+        }
+        .order-stat-card p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .order-item {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        .order-item:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-hover);
+        }
+        .order-item .order-left { flex: 1; min-width: 150px; }
+        .order-item .order-left .order-id { font-weight: 700; color: var(--accent); font-size: 1rem; }
+        .order-item .order-left .order-product { font-weight: 600; color: var(--text-primary); }
+        .order-item .order-left .order-detail { font-size: 0.85rem; color: var(--text-muted); }
+        .order-item .order-right { text-align: right; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+        .order-item .order-right .order-amount { font-weight: 700; color: var(--accent); }
+        .order-item .order-right .order-status { padding: 4px 14px; border-radius: 40px; font-size: 0.75rem; font-weight: 600; }
+        .order-item .order-right .order-date { font-size: 0.75rem; color: var(--text-muted); }
+
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-cancelled { background: #fef2f2; color: #dc2626; }
+        [data-theme="dark"] .status-completed { background: #166534; color: #dcfce7; }
+        [data-theme="dark"] .status-pending { background: #92400e; color: #fef3c7; }
+        [data-theme="dark"] .status-cancelled { background: #7f1d1d; color: #fecaca; }
+
+        .empty-orders { text-align:center; padding:40px; color:var(--text-muted); }
+        .empty-orders i { font-size:3rem; display:block; margin-bottom:12px; color:var(--border-color); }
+    </style>
 </head>
 <body>
     <div class="admin-layout">
@@ -19,6 +79,9 @@
                 <a href="media.html"><i class="fas fa-image"></i> Media</a>
                 <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
             </nav>
+            <div class="sidebar-footer">
+                <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
         </aside>
 
         <main class="admin-main">
@@ -27,14 +90,27 @@
                 <div class="theme-toggle" id="themeToggle">🌙</div>
             </header>
 
+            <!-- Stats -->
+            <div class="order-stats" id="orderStats">
+                <div class="order-stat-card"><h4 id="totalOrders">0</h4><p>Total Orders</p></div>
+                <div class="order-stat-card"><h4 id="totalCompleted">0</h4><p>Completed</p></div>
+                <div class="order-stat-card"><h4 id="totalPending">0</h4><p>Pending</p></div>
+                <div class="order-stat-card"><h4 id="totalRevenue">$0</h4><p>Revenue</p></div>
+            </div>
+
             <div class="admin-toolbar">
                 <button class="btn-add" id="addOrderBtn"><i class="fas fa-plus"></i> Add Order</button>
                 <button class="btn-refresh" id="refreshBtn"><i class="fas fa-sync"></i> Refresh</button>
             </div>
 
-            <div id="ordersContainer"><div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div></div>
+            <div id="ordersContainer">
+                <div style="text-align:center;padding:40px;color:var(--text-muted);">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading orders...</p>
+                </div>
+            </div>
 
-            <!-- Modal -->
+            <!-- ===== ADD ORDER MODAL ===== -->
             <div class="modal" id="orderModal" style="display:none;">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -42,29 +118,55 @@
                         <button class="modal-close" id="orderModalClose">&times;</button>
                     </div>
                     <form id="orderForm">
-                        <div class="form-group"><label>Order ID</label><input type="text" id="orderId" placeholder="ORD-12345678"></div>
-                        <div class="form-group"><label>Product *</label><input type="text" id="orderProduct" required></div>
-                        <div class="form-group"><label>Item</label><input type="text" id="orderItem" placeholder="1 Month"></div>
-                        <div class="form-group"><label>Amount (USD) *</label><input type="number" id="orderAmount" step="0.01" required></div>
-                        <div class="form-group"><label>Status</label>
+                        <input type="hidden" id="editOrderId">
+
+                        <div class="form-group">
+                            <label><i class="fas fa-box"></i> Product Name *</label>
+                            <select id="orderProduct" required>
+                                <option value="">Select Product</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-calendar"></i> Plan / Duration *</label>
+                            <select id="orderPlan" required>
+                                <option value="">Select Plan</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-user"></i> User Info (Username/ID/Link) *</label>
+                            <input type="text" id="orderUserInfo" placeholder="e.g., @username or profile link" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-dollar-sign"></i> Price (USD) *</label>
+                            <input type="number" id="orderPrice" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fas fa-check-circle"></i> Status</label>
                             <select id="orderStatus">
-                                <option value="pending">Pending</option>
                                 <option value="completed">Completed</option>
+                                <option value="pending">Pending</option>
                                 <option value="cancelled">Cancelled</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+
+                        <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Order</button>
                         <button type="button" class="btn-secondary" id="orderModalCancel">Cancel</button>
                     </form>
                 </div>
             </div>
+
         </main>
     </div>
 
+    <!-- ===== SCRIPTS ===== -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/orders.js"></script>
 </body>
 </html>
