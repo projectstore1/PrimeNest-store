@@ -1,42 +1,90 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('💳 Payment page loaded');
 
-    // ===== GET PRODUCT DATA FROM LOCALSTORAGE =====
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // ============================================================
+    // ===== GET PRODUCT DATA =====
+    // ============================================================
     let productData = localStorage.getItem('selectedProduct');
     let product = null;
 
-    console.log('📦 Raw localStorage data:', productData);
-
     if (productData) {
-        try {
-            product = JSON.parse(productData);
-            console.log('✅ Product loaded successfully:', product);
-        } catch (e) {
-            console.error('❌ Error parsing product data:', e);
-        }
+        try { product = JSON.parse(productData); } catch (e) { console.error(e); }
     }
 
-    // If no product, go back to home
     if (!product) {
-        console.log('❌ No product found, redirecting to home');
-        window.location.href = 'PrimeNest.html';
+        window.location.href = 'index.html';
         return;
     }
 
-    // ===== DISPLAY PRODUCT SUMMARY =====
+    // Display Product
     const usdPrice = product.price || 0;
     const nairaPrice = usdPrice * 1440;
-    const productName = product.name || 'Product';
-    const itemName = product.itemName || 'Standard';
 
-    document.getElementById('productName').textContent = productName;
-    document.getElementById('itemName').textContent = itemName;
+    document.getElementById('productName').textContent = product.name || 'Product';
+    document.getElementById('itemName').textContent = product.itemName || 'Standard';
     document.getElementById('productPrice').textContent = usdPrice.toFixed(2);
     document.getElementById('nairaPrice').textContent = nairaPrice.toLocaleString();
 
-    console.log('📊 Summary displayed:', { productName, itemName, usdPrice, nairaPrice });
+    // ============================================================
+    // ===== LOAD USER FIELD FROM PRODUCT =====
+    // ============================================================
+    async function loadUserField() {
+        try {
+            const doc = await db.collection('products').doc(product.id).get();
+            if (doc.exists) {
+                const data = doc.data();
+                const label = data.userFieldLabel || 'Information';
+                const placeholder = data.userFieldPlaceholder || 'Enter your info';
+                const required = data.userFieldRequired !== false;
 
+                document.getElementById('userFieldLabelText').innerHTML = 
+                    label + (required ? ' <span class="required">*</span>' : '');
+                document.getElementById('userInfoInput').placeholder = placeholder;
+                document.getElementById('userInfoInput').required = required;
+                document.getElementById('userInfoInput').dataset.fieldLabel = label;
+            }
+        } catch (error) {
+            console.error('Error loading user field:', error);
+        }
+    }
+    loadUserField();
+
+    // ============================================================
+    // ===== SCREENSHOT UPLOAD =====
+    // ============================================================
+    let screenshotFile = null;
+    const screenshotUpload = document.getElementById('screenshotUpload');
+    const screenshotInput = document.getElementById('screenshotInput');
+    const screenshotPreview = document.getElementById('screenshotPreview');
+
+    screenshotUpload.addEventListener('click', () => screenshotInput.click());
+
+    screenshotInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('❌ File size must be less than 5MB');
+            return;
+        }
+
+        screenshotFile = file;
+        screenshotUpload.classList.add('has-file');
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            screenshotPreview.src = e.target.result;
+            screenshotPreview.classList.add('show');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // ============================================================
     // ===== CURRENCY SELECTION =====
+    // ============================================================
     let selectedCurrency = 'crypto';
     const currencyCards = document.querySelectorAll('.currency-card');
     const cryptoDetails = document.getElementById('cryptoDetails');
@@ -55,127 +103,153 @@ document.addEventListener('DOMContentLoaded', function() {
                 cryptoDetails.style.display = 'none';
                 nairaDetails.style.display = 'block';
             }
-            console.log('🔄 Currency selected:', selectedCurrency);
         });
     });
 
+    // ============================================================
     // ===== COPY ADDRESS =====
-    const copyFeedback = document.getElementById('copyFeedback');
-
+    // ============================================================
     document.querySelectorAll('.copy-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             const address = this.dataset.address;
-            if (!address) return;
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(address).then(() => {
-                    showCopyFeedback();
-                }).catch(() => {
-                    fallbackCopy(address);
-                });
-            } else {
-                fallbackCopy(address);
-            }
+            navigator.clipboard.writeText(address).then(() => {
+                const original = this.innerHTML;
+                this.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => this.innerHTML = original, 1500);
+            });
         });
     });
 
-    function showCopyFeedback() {
-        copyFeedback.style.display = 'block';
-        copyFeedback.innerHTML = '<i class="fas fa-check-circle"></i> Address copied!';
-        setTimeout(() => {
-            copyFeedback.style.display = 'none';
-        }, 2000);
+    // ============================================================
+    // ===== GENERATE ORDER ID =====
+    // ============================================================
+    async function generateOrderId() {
+        try {
+            const counterDoc = await db.collection('settings').doc('orderCounter').get();
+            if (counterDoc.exists) {
+                const currentCounter = counterDoc.data().counter || 0;
+                const newCounter = currentCounter + 1;
+                await db.collection('settings').doc('orderCounter').set({ counter: newCounter }, { merge: true });
+                return newCounter;
+            } else {
+                const ordersSnap = await db.collection('orders').get();
+                const startCounter = ordersSnap.size + 1;
+                await db.collection('settings').doc('orderCounter').set({ counter: startCounter });
+                return startCounter;
+            }
+        } catch (error) {
+            return Date.now().toString().slice(-6);
+        }
     }
 
-    function fallbackCopy(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        showCopyFeedback();
-    }
+    // ============================================================
+    // ===== CONFIRM ORDER =====
+    // ============================================================
+    const confirmBtn = document.getElementById('confirmOrderBtn');
 
-    // ===== GENERATE ORDER MESSAGE =====
-    function generateOrderMessage(platform) {
-        const now = new Date();
-        const date = now.toLocaleDateString();
-        const time = now.toLocaleTimeString();
-        const orderId = 'ORD-' + Date.now().toString().slice(-8);
+    confirmBtn.addEventListener('click', async function() {
+        // Validation
+        const userInfo = document.getElementById('userInfoInput').value.trim();
+        const userFieldLabel = document.getElementById('userInfoInput').dataset.fieldLabel || 'Information';
 
-        const usdPrice = product.price || 0;
-        const nairaPrice = usdPrice * 1440;
-        const currencyLabel = selectedCurrency === 'crypto' ? '🪙 Crypto' : '🇳🇬 Naira';
-        const currencyAmount = selectedCurrency === 'crypto' ? '$' + usdPrice.toFixed(2) : '₦' + nairaPrice.toLocaleString();
-
-        let message = '';
-        message += '━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-        message += '🛍️ *NEW ORDER*\n';
-        message += '━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
-        message += '📦 *Product:* ' + product.name + '\n';
-        message += '📋 *Item:* ' + (product.itemName || 'Standard') + '\n';
-        message += '💰 *Amount:* ' + currencyAmount + ' (' + currencyLabel + ')\n';
-        message += '💵 *USD:* $' + usdPrice.toFixed(2) + '\n';
-        message += '🇳🇬 *Naira:* ₦' + nairaPrice.toLocaleString() + '\n';
-        message += '🆔 *Order ID:* ' + orderId + '\n';
-        message += '📅 *Date:* ' + date + ' ' + time + '\n';
-        message += '📱 *Platform:* ' + platform + '\n\n';
-        message += '━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-        message += '✅ *Payment Method:* ' + currencyLabel + '\n';
-
-        if (selectedCurrency === 'crypto') {
-            message += '\n📌 *Crypto Addresses:*\n';
-            message += '🔹 EVM: 0x2711d473156609B418Fb41d340fF361A4297D278\n';
-            message += '🔹 Aptos: 0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218\n';
-            message += '🔹 Solana: H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy\n';
-        } else {
-            message += '\n📌 *Bank Details:*\n';
-            message += '🔹 PalmPay: 6669361510\n';
-            message += '🔹 9PSB: 6019315948\n';
-            message += '🔹 Account Name: BillStack / Nasfam_Pay – MD ABDULLAH\n';
-            message += '🔹 Bybit UID: 151723688\n';
-            message += '🔹 MEXC UID: 18127696\n';
+        if (!userInfo) {
+            alert(`❌ Please enter your ${userFieldLabel}`);
+            document.getElementById('userInfoInput').focus();
+            return;
         }
 
-        message += '\n━━━━━━━━━━━━━━━━━━━━━━━━━\n';
-        message += '📤 *Please send payment screenshot here*';
-        message += '\n━━━━━━━━━━━━━━━━━━━━━━━━━';
+        if (!screenshotFile) {
+            alert('❌ Please upload payment screenshot');
+            return;
+        }
 
-        return message;
-    }
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
-    // ===== TELEGRAM BUTTON =====
-    document.getElementById('telegramBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        const message = generateOrderMessage('Telegram');
-        console.log('📤 Telegram message:', message);
-        const encoded = encodeURIComponent(message);
-        window.open('https://t.me/abdullha2?text=' + encoded, '_blank');
+        try {
+            // 1. Upload Screenshot to Firebase Storage
+            console.log('📤 Uploading screenshot...');
+            const timestamp = Date.now();
+            const fileName = `screenshots/${timestamp}_${screenshotFile.name}`;
+            const storageRef = storage.ref(fileName);
+            const uploadTask = await storageRef.put(screenshotFile);
+            const screenshotUrl = await uploadTask.ref.getDownloadURL();
+            console.log('✅ Screenshot uploaded:', screenshotUrl);
+
+            // 2. Generate Order ID
+            const orderId = await generateOrderId();
+
+            // 3. Save Order to Firestore
+            const orderData = {
+                orderId: orderId,
+                productId: product.id,
+                productName: product.name,
+                planId: product.itemId || '',
+                plan: product.itemName || 'Standard',
+                userInfo: userInfo,
+                userFieldLabel: userFieldLabel,
+                price: usdPrice,
+                nairaPrice: nairaPrice,
+                currency: selectedCurrency,
+                screenshotUrl: screenshotUrl,
+                paymentMethod: selectedCurrency === 'crypto' ? 'Crypto' : 'Nigeria Bank Transfer',
+                status: 'pending',
+                invoiceCreated: true,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            const docRef = await db.collection('orders').add(orderData);
+            console.log('✅ Order saved:', docRef.id);
+
+            // 4. Save Invoice Data
+            const invoiceData = {
+                invoiceId: 'INV-' + orderId,
+                orderId: orderId,
+                orderDocId: docRef.id,
+                productName: product.name,
+                plan: product.itemName || 'Standard',
+                userInfo: userInfo,
+                userFieldLabel: userFieldLabel,
+                price: usdPrice,
+                nairaPrice: nairaPrice,
+                currency: selectedCurrency,
+                screenshotUrl: screenshotUrl,
+                status: 'pending',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await db.collection('invoices').add(invoiceData);
+            console.log('✅ Invoice created');
+
+            // 5. Clear localStorage
+            localStorage.removeItem('selectedProduct');
+
+            // 6. Redirect to Invoice Page
+            localStorage.setItem('lastInvoice', JSON.stringify(invoiceData));
+            window.location.href = 'invoice.html?orderId=' + orderId;
+
+        } catch (error) {
+            console.error('❌ Error:', error);
+            alert('❌ Error: ' + error.message);
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Order & Get Invoice';
+        }
     });
 
-    // ===== WHATSAPP BUTTON =====
-    document.getElementById('whatsappBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        const message = generateOrderMessage('WhatsApp');
-        console.log('📤 WhatsApp message:', message);
-        const encoded = encodeURIComponent(message);
-        window.open('https://wa.me/+8801874613165?text=' + encoded, '_blank');
-    });
-
-    // ===== DARK MODE TOGGLE =====
+    // ============================================================
+    // ===== THEME TOGGLE =====
+    // ============================================================
     const themeToggle = document.getElementById('themeToggle');
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
 
     themeToggle.addEventListener('click', function() {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
-        themeToggle.innerHTML = newTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('theme', next);
+        themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
     });
-
-    console.log('✅ Payment page ready');
 });
