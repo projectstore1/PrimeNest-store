@@ -16,42 +16,27 @@
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow);
         }
-
         .payment-container h2 {
             color: var(--text-primary);
             margin-bottom: 24px;
             text-align: center;
         }
-
         .payment-summary {
             background: var(--bg-primary);
             padding: 20px;
             border-radius: 16px;
             margin-bottom: 24px;
         }
-
         .payment-summary .row {
             display: flex;
             justify-content: space-between;
             padding: 6px 0;
             color: var(--text-primary);
         }
-
-        .payment-summary .row .label {
-            color: var(--text-muted);
-        }
-
-        .payment-summary .row .value {
-            font-weight: 700;
-        }
-
-        .payment-summary .row .price-usd {
-            color: var(--accent);
-        }
-
-        .payment-summary .row .price-naira {
-            color: #16a34a;
-        }
+        .payment-summary .row .label { color: var(--text-muted); }
+        .payment-summary .row .value { font-weight: 700; }
+        .payment-summary .row .price-usd { color: var(--accent); }
+        .payment-summary .row .price-naira { color: #16a34a; }
 
         .section-box {
             background: var(--bg-primary);
@@ -60,7 +45,6 @@
             margin-bottom: 20px;
             border: 1px solid var(--border-color);
         }
-
         .section-box h3 {
             color: var(--text-primary);
             font-size: 1rem;
@@ -69,17 +53,13 @@
             align-items: center;
             gap: 8px;
         }
-
-        .section-box h3 i {
-            color: var(--accent);
-        }
+        .section-box h3 i { color: var(--accent); }
 
         .currency-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
-
         .currency-card {
             background: var(--bg-secondary);
             padding: 16px;
@@ -90,12 +70,10 @@
             transition: all 0.2s;
             color: var(--text-primary);
         }
-
         .currency-card.active {
             border-color: var(--accent);
             background: var(--notice-bg);
         }
-
         .currency-card i {
             font-size: 1.8rem;
             display: block;
@@ -109,7 +87,6 @@
             margin-bottom: 10px;
             border: 1px solid var(--border-color);
         }
-
         .address-box label {
             display: block;
             font-weight: 600;
@@ -117,7 +94,6 @@
             margin-bottom: 6px;
             color: var(--text-secondary);
         }
-
         .address-copy {
             display: flex;
             align-items: center;
@@ -127,14 +103,12 @@
             border-radius: 10px;
             border: 1px solid var(--border-color);
         }
-
         .address-copy code {
             flex: 1;
             font-size: 0.8rem;
             word-break: break-all;
             color: var(--text-primary);
         }
-
         .copy-btn {
             background: none;
             border: none;
@@ -145,10 +119,7 @@
             border-radius: 8px;
         }
 
-        .user-field {
-            margin-bottom: 16px;
-        }
-
+        .user-field { margin-bottom: 16px; }
         .user-field label {
             display: block;
             font-weight: 600;
@@ -156,13 +127,8 @@
             font-size: 0.9rem;
             margin-bottom: 6px;
         }
-
-        .user-field label .required {
-            color: #dc2626;
-        }
-
-        .user-field input,
-        .user-field textarea {
+        .user-field label .required { color: #dc2626; }
+        .user-field input {
             width: 100%;
             padding: 12px 16px;
             border: 2px solid var(--border-color);
@@ -172,13 +138,11 @@
             font-size: 0.95rem;
             transition: all 0.2s;
         }
-
         .user-field input:focus {
             border-color: var(--accent);
             outline: none;
         }
 
-        /* ===== SCREENSHOT UPLOAD ===== */
         .screenshot-upload {
             border: 2px dashed var(--border-color);
             border-radius: 16px;
@@ -188,43 +152,33 @@
             transition: all 0.3s;
             background: var(--bg-secondary);
         }
-
         .screenshot-upload:hover {
             border-color: var(--accent);
             background: var(--notice-bg);
         }
-
         .screenshot-upload.has-file {
             border-color: #22c55e;
             background: #f0fdf4;
         }
-
         [data-theme="dark"] .screenshot-upload.has-file {
             background: #14532d33;
         }
-
         .screenshot-upload i {
             font-size: 2.5rem;
             color: var(--accent);
             display: block;
             margin-bottom: 10px;
         }
-
-        .screenshot-upload input[type="file"] {
-            display: none;
-        }
-
+        .screenshot-upload input[type="file"] { display: none; }
         .screenshot-upload .upload-text {
             color: var(--text-primary);
             font-weight: 600;
         }
-
         .screenshot-upload .upload-hint {
             color: var(--text-muted);
             font-size: 0.8rem;
             margin-top: 4px;
         }
-
         .screenshot-preview {
             max-width: 100%;
             max-height: 200px;
@@ -232,13 +186,11 @@
             margin-top: 12px;
             display: none;
         }
-
         .screenshot-preview.show {
             display: block;
             margin: 12px auto 0;
         }
 
-        /* ===== SUBMIT BUTTON ===== */
         .btn-confirm {
             width: 100%;
             padding: 16px;
@@ -256,12 +208,10 @@
             gap: 10px;
             margin-top: 20px;
         }
-
         .btn-confirm:hover:not(:disabled) {
             background: #16a34a;
             transform: scale(1.02);
         }
-
         .btn-confirm:disabled {
             opacity: 0.6;
             cursor: not-allowed;
@@ -275,13 +225,8 @@
         }
 
         @media (max-width: 600px) {
-            .payment-container {
-                padding: 20px;
-                margin: 16px;
-            }
-            .currency-grid {
-                grid-template-columns: 1fr;
-            }
+            .payment-container { padding: 20px; margin: 16px; }
+            .currency-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -308,7 +253,7 @@
         <div class="payment-container">
             <h2><i class="fas fa-credit-card"></i> Complete Payment</h2>
 
-            <!-- ===== PRODUCT SUMMARY ===== -->
+            <!-- Product Summary -->
             <div class="payment-summary">
                 <div class="row">
                     <span class="label">Product:</span>
@@ -328,16 +273,16 @@
                 </div>
             </div>
 
-            <!-- ===== USER INFO FIELD (Dynamic from Admin) ===== -->
+            <!-- User Info -->
             <div class="section-box">
                 <h3><i class="fas fa-user"></i> Your Information</h3>
                 <div class="user-field">
                     <label id="userFieldLabelText">Information <span class="required">*</span></label>
-                    <input type="text" id="userInfoInput" placeholder="Enter your info" required>
+                    <input type="text" id="userInfoInput" placeholder="Enter your info">
                 </div>
             </div>
 
-            <!-- ===== PAYMENT SCREENSHOT UPLOAD ===== -->
+            <!-- Screenshot Upload -->
             <div class="section-box">
                 <h3><i class="fas fa-camera"></i> Payment Screenshot <span class="required" style="color:#dc2626;">*</span></h3>
                 <div class="screenshot-upload" id="screenshotUpload">
@@ -346,10 +291,10 @@
                     <div class="upload-text">Click to upload payment screenshot</div>
                     <div class="upload-hint">PNG, JPG up to 5MB</div>
                 </div>
-                <img id="screenshotPreview" class="screenshot-preview" alt="Screenshot Preview">
+                <img id="screenshotPreview" class="screenshot-preview" alt="Preview">
             </div>
 
-            <!-- ===== CURRENCY SELECTION ===== -->
+            <!-- Currency Selection -->
             <div class="section-box">
                 <h3><i class="fas fa-coins"></i> Select Payment Currency</h3>
                 <div class="currency-grid">
@@ -364,13 +309,11 @@
                 </div>
             </div>
 
-            <!-- ===== PAYMENT DETAILS ===== -->
+            <!-- Payment Details -->
             <div class="section-box" id="paymentDetails">
-                <!-- Crypto -->
                 <div id="cryptoDetails">
                     <h3><i class="fab fa-bitcoin"></i> Crypto Payment</h3>
                     <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Accepted: <strong>USDT, USDC, SOL</strong></p>
-                    
                     <div class="address-box">
                         <label>EVM (BEP20 / Arbitrum / Polygon)</label>
                         <div class="address-copy">
@@ -378,7 +321,6 @@
                             <button class="copy-btn" data-address="0x2711d473156609B418Fb41d340fF361A4297D278"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-
                     <div class="address-box">
                         <label>Aptos (USDT)</label>
                         <div class="address-copy">
@@ -386,7 +328,6 @@
                             <button class="copy-btn" data-address="0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-
                     <div class="address-box">
                         <label>Solana (USDT / USDC / SOL)</label>
                         <div class="address-copy">
@@ -395,8 +336,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Naira -->
                 <div id="nairaDetails" style="display:none;">
                     <h3><i class="fas fa-money-bill-wave"></i> Nigeria Bank Transfer</h3>
                     <div class="address-box">
@@ -422,18 +361,17 @@
                 </div>
             </div>
 
-            <!-- ===== CONFIRM ORDER BUTTON ===== -->
             <button class="btn-confirm" id="confirmOrderBtn">
                 <i class="fas fa-check-circle"></i> Confirm Order & Get Invoice
             </button>
 
             <p class="notice-text">
-                <i class="fas fa-info-circle"></i> Payment screenshot আপলোড করে Confirm করুন। Invoice স্বয়ংক্রিয়ভাবে তৈরি হবে।
+                <i class="fas fa-info-circle"></i> Payment screenshot আপলোড করে Confirm করুন।
             </p>
-
         </div>
     </main>
 
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
