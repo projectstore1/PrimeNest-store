@@ -12,13 +12,10 @@
         <aside class="sidebar">
             <div class="sidebar-brand">🏪 PremiumStore</div>
             <nav class="sidebar-nav">
-                <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
                 <a href="products.html" class="active"><i class="fas fa-box"></i> Products</a>
-                <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
-                <a href="quick-order.html"><i class="fas fa-bolt"></i> Quick Order</a>
                 <a href="invoices.html"><i class="fas fa-file-invoice"></i> Invoices</a>
-                <a href="payments.html"><i class="fas fa-credit-card"></i> Payments</a>
-                <a href="media.html"><i class="fas fa-image"></i> Media</a>
+                <a href="quick-order.html"><i class="fas fa-bolt"></i> Quick Order</a>
+                <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
                 <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
             </nav>
             <div class="sidebar-footer">
@@ -37,7 +34,12 @@
                 <button class="btn-refresh" id="refreshBtn"><i class="fas fa-sync"></i> Refresh</button>
             </div>
 
-            <div id="productsContainer"></div>
+            <div id="productsContainer">
+                <div style="text-align:center;padding:40px;color:var(--text-muted);">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading products...</p>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -68,11 +70,10 @@
                     <textarea id="productDescription" rows="3"></textarea>
                 </div>
 
-                <!-- ===== NEW: User Info Field ===== -->
                 <div class="form-group">
                     <label>User Info Field Label *</label>
                     <input type="text" id="userFieldLabel" placeholder="e.g., X Username / Profile Link" required>
-                    <small style="color:var(--text-muted);font-size:0.8rem;">User কে কি দিতে বলবেন সেটা লিখুন (যেমন: X Username, Profile Link)</small>
+                    <small style="color:var(--text-muted);font-size:0.8rem;">User কে কি দিতে বলবেন সেটা লিখুন</small>
                 </div>
 
                 <div class="form-group">
@@ -95,8 +96,11 @@
                         <option value="soldout">Sold Out</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Product</button>
-                <button type="button" class="btn-secondary" id="modalCancel">Cancel</button>
+                
+                <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+                    <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Product</button>
+                    <button type="button" class="btn-secondary" id="modalCancel">Cancel</button>
+                </div>
             </form>
 
             <hr style="margin:20px 0;border-color:var(--border-color);">
@@ -105,7 +109,7 @@
             <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
                 <input type="text" id="itemNameInput" placeholder="Item name" style="flex:1;min-width:100px;padding:10px;border-radius:12px;border:2px solid var(--border-color);background:var(--input-bg);color:var(--text-primary);">
                 <input type="number" id="itemPriceInput" placeholder="Price" style="width:100px;padding:10px;border-radius:12px;border:2px solid var(--border-color);background:var(--input-bg);color:var(--text-primary);">
-                <button class="btn-add" id="addItemBtn" style="padding:10px 20px;"><i class="fas fa-plus"></i> Add</button>
+                <button type="button" class="btn-add" id="addItemBtn" style="padding:10px 20px;"><i class="fas fa-plus"></i> Add</button>
             </div>
         </div>
     </div>
