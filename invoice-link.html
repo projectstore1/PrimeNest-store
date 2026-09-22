@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Invoice Ready - PremiumStore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
+
+        body {
+            background: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .share-container {
+            max-width: 480px;
+            width: 100%;
+            background: #111111;
+            border-radius: 28px;
+            padding: 32px 24px;
+            border: 1px solid #222;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+
+        /* ===== SUCCESS ICON ===== */
+        .success-icon {
+            width: 90px;
+            height: 90px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: scaleIn 0.5s ease;
+            box-shadow: 0 10px 30px rgba(34, 197, 94, 0.3);
+        }
+
+        .success-icon i {
+            font-size: 2.8rem;
+            color: white;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        h1 {
+            color: #ffffff;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* ===== ORDER SUMMARY ===== */
+        .order-summary {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .order-summary .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            font-size: 0.85rem;
+        }
+
+        .order-summary .row .label {
+            color: #888;
+        }
+
+        .order-summary .row .value {
+            color: #ffffff;
+            font-weight: 600;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-all;
+        }
+
+        .order-summary .row .value.accent {
+            color: #1DA1F2;
+            font-weight: 700;
+        }
+
+        /* ===== LINK BOX ===== */
+        .link-label {
+            color: #888;
+            font-size: 0.8rem;
+            text-align: left;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .link-label i {
+            color: #1DA1F2;
+        }
+
+        .link-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .link-input {
+            flex: 1;
+            padding: 14px 16px;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            border-radius: 14px;
+            color: #1DA1F2;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            cursor: text;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .link-input:focus {
+            border-color: #1DA1F2;
+            outline: none;
+        }
+
+        .btn-copy {
+            padding: 14px 20px;
+            background: #1DA1F2;
+            color: #000;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-copy:hover {
+            background: #1a8cd8;
+            transform: scale(1.03);
+        }
+
+        .btn-copy.copied {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-copy i {
+            font-size: 1rem;
+        }
+
+        /* ===== SHARE BUTTONS ===== */
+        .share-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .share-btn {
+            padding: 14px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .share-btn.telegram {
+            background: #0088cc;
+            color: white;
+        }
+
+        .share-btn.telegram:hover {
+            background: #006699;
+            transform: scale(1.03);
+        }
+
+        .share-btn.whatsapp {
+            background: #25d366;
+            color: white;
+        }
+
+        .share-btn.whatsapp:hover {
+            background: #1da851;
+            transform: scale(1.03);
+        }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px;
+            border-radius: 14px;
+            border: 2px solid #333;
+            background: transparent;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-action:hover {
+            border-color: #1DA1F2;
+            color: #1DA1F2;
+        }
+
+        .btn-action.primary {
+            background: #1DA1F2;
+            color: #000;
+            border-color: #1DA1F2;
+        }
+
+        .btn-action.primary:hover {
+            background: #1a8cd8;
+            color: #000;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
+        }
+
+        .toast.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        .toast.error {
+            background: #dc2626;
+            box-shadow: 0 8px 30px rgba(220, 38, 38, 0.4);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 400px) {
+            .share-container { padding: 24px 18px; }
+            h1 { font-size: 1.2rem; }
+            .share-buttons { grid-template-columns: 1fr; }
+            .link-box { flex-direction: column; }
+            .btn-copy { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="share-container">
+
+        <!-- Success Icon -->
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+
+        <h1>Order Confirmed! 🎉</h1>
+        <p class="subtitle">আপনার Invoice তৈরি হয়েছে। নিচের লিংক Copy করে Share করুন অথবা সরাসরি Invoice দেখুন।</p>
+
+        <!-- Order Summary -->
+        <div class="order-summary" id="orderSummary">
+            <div class="row">
+                <span class="label">Order ID:</span>
+                <span class="value accent" id="summaryOrderId">#0000</span>
+            </div>
+            <div class="row">
+                <span class="label">Product:</span>
+                <span class="value" id="summaryProduct">Loading...</span>
+            </div>
+            <div class="row">
+                <span class="label">Plan:</span>
+                <span class="value" id="summaryPlan">--</span>
+            </div>
+            <div class="row">
+                <span class="label">Amount:</span>
+                <span class="value accent" id="summaryPrice">$0.00</span>
+            </div>
+            <div class="row">
+                <span class="label">Status:</span>
+                <span class="value" id="summaryStatus">--</span>
+            </div>
+        </div>
+
+        <!-- Share Link -->
+        <div class="link-label">
+            <i class="fas fa-link"></i> Shareable Invoice Link:
+        </div>
+        <div class="link-box">
+            <input type="text" class="link-input" id="shareLink" readonly>
+            <button class="btn-copy" id="copyBtn">
+                <i class="fas fa-copy"></i> <span>Copy</span>
+            </button>
+        </div>
+
+        <!-- Share Buttons -->
+        <div class="share-buttons">
+            <button class="share-btn telegram" id="shareTelegram">
+                <i class="fab fa-telegram-plane"></i> Telegram
+            </button>
+            <button class="share-btn whatsapp" id="shareWhatsapp">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            <a class="btn-action primary" id="viewInvoiceBtn" href="#">
+                <i class="fas fa-file-invoice"></i> View Invoice
+            </a>
+            <a class="btn-action" href="index.html">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div class="toast" id="toastMsg">✅ Link copied!</div>
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔗 Share Link page loaded');
+
+            const db = firebase.firestore();
+
+            // ============================================================
+            // ===== GET ORDER DATA =====
+            // ============================================================
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+
+            // ============================================================
+            // ===== GENERATE SHARE LINK =====
+            // ============================================================
+            // Base URL from current location
+            const baseUrl = window.location.origin + window.location.pathname.replace('invoice-link.html', 'invoice.html');
+            const shareLink = baseUrl + '?orderId=' + (orderId || '');
+
+            document.getElementById('shareLink').value = shareLink;
+            document.getElementById('viewInvoiceBtn').href = 'invoice.html?orderId=' + (orderId || '');
+
+            console.log('🔗 Share Link:', shareLink);
+
+            // ============================================================
+            // ===== LOAD ORDER DATA =====
+            // ============================================================
+            async function loadOrderData() {
+                try {
+                    let data = null;
+
+                    // Try localStorage first
+                    const cached = localStorage.getItem('lastInvoice');
+                    if (cached) {
+                        try { data = JSON.parse(cached); } catch (e) {}
+                    }
+
+                    // If orderId given, fetch from Firebase
+                    if (orderId) {
+                        const snapshot = await db.collection('invoices')
+                            .where('orderId', '==', parseInt(orderId))
+                            .limit(1)
+                            .get();
+                        if (!snapshot.empty) {
+                            data = snapshot.docs[0].data();
+                        }
+                    }
+
+                    if (!data) {
+                        // Fallback from localStorage selectedProduct
+                        const prod = localStorage.getItem('selectedProduct');
+                        if (prod) {
+                            try {
+                                const p = JSON.parse(prod);
+                                data = {
+                                    orderId: orderId || 'N/A',
+                                    productName: p.name,
+                                    plan: p.itemName,
+                                    price: p.price,
+                                    status: 'pending'
+                                };
+                            } catch (e) {}
+                        }
+                    }
+
+                    if (!data) {
+                        console.log('⚠️ No order data found');
+                        return;
+                    }
+
+                    // Display in summary
+                    document.getElementById('summaryOrderId').textContent = '#' + (data.orderId || 'N/A');
+                    document.getElementById('summaryProduct').textContent = data.productName || 'Product';
+                    document.getElementById('summaryPlan').textContent = data.plan || 'Standard';
+                    document.getElementById('summaryPrice').textContent = '$' + (data.price || 0).toFixed(2);
+                    document.getElementById('summaryStatus').textContent = (data.status || 'pending').charAt(0).toUpperCase() + (data.status || 'pending').slice(1);
+
+                    // Update share link if orderId was missing
+                    if (!orderId && data.orderId) {
+                        const newLink = baseUrl + '?orderId=' + data.orderId;
+                        document.getElementById('shareLink').value = newLink;
+                        document.getElementById('viewInvoiceBtn').href = 'invoice.html?orderId=' + data.orderId;
+                    }
+
+                } catch (error) {
+                    console.error('❌ Error loading order:', error);
+                }
+            }
+
+            loadOrderData();
+
+            // ============================================================
+            // ===== COPY LINK =====
+            // ============================================================
+            const copyBtn = document.getElementById('copyBtn');
+            const linkInput = document.getElementById('shareLink');
+            const toast = document.getElementById('toastMsg');
+
+            copyBtn.addEventListener('click', function() {
+                const link = linkInput.value;
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(link).then(() => {
+                        showCopiedState();
+                    }).catch(() => {
+                        fallbackCopy(link);
+                    });
+                } else {
+                    fallbackCopy(link);
+                }
+            });
+
+            function fallbackCopy(text) {
+                linkInput.select();
+                linkInput.setSelectionRange(0, 99999);
+                document.execCommand('copy');
+                showCopiedState();
+            }
+
+            function showCopiedState() {
+                copyBtn.classList.add('copied');
+                copyBtn.innerHTML = '<i class="fas fa-check"></i> <span>Copied!</span>';
+                showToast('✅ Link copied to clipboard!');
+
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtn.innerHTML = '<i class="fas fa-copy"></i> <span>Copy</span>';
+                }, 2000);
+            }
+
+            function showToast(msg, isError = false) {
+                toast.textContent = msg;
+                toast.className = 'toast show' + (isError ? ' error' : '');
+                setTimeout(() => {
+                    toast.className = 'toast';
+                }, 2500);
+            }
+
+            // ============================================================
+            // ===== SHARE TO TELEGRAM =====
+            // ============================================================
+            document.getElementById('shareTelegram').addEventListener('click', function() {
+                const link = linkInput.value;
+                const text = encodeURIComponent('🧾 Your Invoice from PremiumStore:\n\n' + link + '\n\nThank you for your purchase!');
+                window.open('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + text, '_blank');
+            });
+
+            // ============================================================
+            // ===== SHARE TO WHATSAPP =====
+            // ============================================================
+            document.getElementById('shareWhatsapp').addEventListener('click', function() {
+                const link = linkInput.value;
+                const text = encodeURIComponent('🧾 Your Invoice from PremiumStore:\n\n' + link + '\n\nThank you for your purchase!');
+                window.open('https://wa.me/?text=' + text, '_blank');
+            });
+
+        });
+    </script>
+
+</body>
+</html>
