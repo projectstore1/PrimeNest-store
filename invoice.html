@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - PremiumStore</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background: #f0f4fe;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .invoice-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .action-bar button, .action-bar a {
+            padding: 12px 24px;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-print { background: #2563eb; color: white; }
+        .btn-print:hover { background: #1d4ed8; }
+        .btn-pdf { background: #dc2626; color: white; }
+        .btn-pdf:hover { background: #b91c1c; }
+        .btn-support { background: #0088cc; color: white; }
+        .btn-support:hover { background: #006699; }
+        .btn-home { background: #22c55e; color: white; }
+        .btn-home:hover { background: #16a34a; }
+
+        /* ===== INVOICE ===== */
+        .invoice {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            position: relative;
+        }
+
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2563eb;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .invoice-header .logo-side {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .invoice-header .logo-side img {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            object-fit: cover;
+        }
+
+        .invoice-header .logo-side h1 {
+            color: #0b1a3a;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .invoice-header .logo-side p {
+            color: #6b7a9a;
+            font-size: 0.8rem;
+        }
+
+        .invoice-header .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-header .invoice-meta h2 {
+            color: #2563eb;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .invoice-header .invoice-meta p {
+            color: #6b7a9a;
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+
+        .invoice-header .invoice-meta .status-badge {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-completed { background: #dcfce7; color: #166534; }
+        .status-cancelled { background: #fef2f2; color: #dc2626; }
+
+        .invoice-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .info-section h3 {
+            color: #0b1a3a;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid #eef2f9;
+        }
+
+        .info-section p {
+            color: #4a5a7a;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .info-section p strong {
+            color: #0b1a3a;
+        }
+
+        /* ===== ITEMS TABLE ===== */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+
+        .items-table thead {
+            background: #f5f7fc;
+        }
+
+        .items-table th {
+            padding: 12px 14px;
+            text-align: left;
+            color: #4a5a7a;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .items-table td {
+            padding: 14px;
+            border-bottom: 1px solid #eef2f9;
+            color: #0b1a3a;
+            font-size: 0.9rem;
+        }
+
+        .items-table .item-name {
+            font-weight: 700;
+        }
+
+        .items-table .item-price {
+            text-align: right;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        /* ===== TOTAL BOX ===== */
+        .total-box {
+            background: #f5f7fc;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .total-box .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            color: #4a5a7a;
+            font-size: 0.9rem;
+        }
+
+        .total-box .total-row.grand-total {
+            border-top: 2px solid #2563eb;
+            margin-top: 8px;
+            padding-top: 12px;
+            color: #0b1a3a;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .total-box .total-row.grand-total span:last-child {
+            color: #2563eb;
+        }
+
+        /* ===== SCREENSHOT ===== */
+        .screenshot-section {
+            margin-bottom: 24px;
+        }
+
+        .screenshot-section h3 {
+            color: #0b1a3a;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .screenshot-section img {
+            max-width: 200px;
+            border-radius: 12px;
+            border: 2px solid #eef2f9;
+        }
+
+        /* ===== FOOTER ===== */
+        .invoice-footer {
+            border-top: 2px solid #eef2f9;
+            padding-top: 20px;
+            text-align: center;
+        }
+
+        .invoice-footer .support-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .invoice-footer .support-links a {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .invoice-footer .thank-you {
+            color: #6b7a9a;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .invoice-footer .credit {
+            color: #6b7a9a;
+            font-size: 0.75rem;
+        }
+
+        @media (max-width: 600px) {
+            .invoice { padding: 24px 20px; }
+            .invoice-body { grid-template-columns: 1fr; gap: 16px; }
+            .invoice-header .invoice-meta { text-align: left; }
+            .action-bar button, .action-bar a { padding: 10px 16px; font-size: 0.8rem; }
+        }
+
+        /* Print styles */
+        @media print {
+            body { background: white; padding: 0; }
+            .action-bar { display: none; }
+            .invoice { box-shadow: none; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-wrapper">
+
+        <!-- ===== ACTION BUTTONS ===== -->
+        <div class="action-bar">
+            <button class="btn-print" onclick="printInvoice()"><i class="fas fa-print"></i> Print</button>
+            <button class="btn-pdf" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            <a class="btn-support" href="https://t.me/abdullha2" target="_blank"><i class="fab fa-telegram"></i> Support</a>
+            <a class="btn-home" href="index.html"><i class="fas fa-home"></i> Home</a>
+        </div>
+
+        <!-- ===== INVOICE ===== -->
+        <div class="invoice" id="invoiceContent">
+
+            <!-- Header -->
+            <div class="invoice-header">
+                <div class="logo-side">
+                    <img src="https://via.placeholder.com/50x50?text=PS" alt="PremiumStore Logo" id="invoiceLogo">
+                    <div>
+                        <h1>PremiumStore</h1>
+                        <p>Premium Digital Products</p>
+                    </div>
+                </div>
+                <div class="invoice-meta">
+                    <h2>INVOICE</h2>
+                    <p>#<span id="invoiceId">INV-0000</span></p>
+                    <p id="invoiceDate">--</p>
+                    <span class="status-badge status-pending" id="invoiceStatus">Pending</span>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="invoice-body">
+                <div class="info-section">
+                    <h3>Customer Info</h3>
+                    <p><strong id="customerFieldLabel">Information:</strong></p>
+                    <p id="customerInfo">--</p>
+                </div>
+                <div class="info-section">
+                    <h3>Order Info</h3>
+                    <p><strong>Order ID:</strong> #<span id="orderId">--</span></p>
+                    <p><strong>Payment:</strong> <span id="paymentMethod">--</span></p>
+                </div>
+            </div>
+
+            <!-- Items Table -->
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Plan</th>
+                        <th style="text-align:right;">Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="item-name" id="itemProductName">--</td>
+                        <td id="itemPlanName">--</td>
+                        <td class="item-price">$<span id="itemPrice">0.00</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Total -->
+            <div class="total-box">
+                <div class="total-row">
+                    <span>Subtotal</span>
+                    <span>$<span id="subTotal">0.00</span></span>
+                </div>
+                <div class="total-row">
+                    <span>Naira Equivalent</span>
+                    <span>₦<span id="nairaTotal">0</span></span>
+                </div>
+                <div class="total-row grand-total">
+                    <span>Total</span>
+                    <span>$<span id="grandTotal">0.00</span></span>
+                </div>
+            </div>
+
+            <!-- Screenshot -->
+            <div class="screenshot-section" id="screenshotSection">
+                <h3>Payment Screenshot</h3>
+                <img id="invoiceScreenshot" src="" alt="Payment Screenshot">
+            </div>
+
+            <!-- Footer -->
+            <div class="invoice-footer">
+                <div class="support-links">
+                    <a href="https://t.me/abdullha2" target="_blank"><i class="fab fa-telegram"></i> Telegram</a>
+                    <a href="https://wa.me/message/NSIUKXADRUXJA1" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                    <a href="index.html"><i class="fas fa-globe"></i> PremiumStore</a>
+                </div>
+                <p class="thank-you">Thank you for your purchase! 💙</p>
+                <p class="credit">Developed by Abdullha Khan</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 Invoice page loaded');
+
+            const db = firebase.firestore();
+
+            // ============================================================
+            // ===== LOAD INVOICE DATA =====
+            // ============================================================
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+
+            async function loadInvoice() {
+                try {
+                    let invoiceData = null;
+
+                    // First try from localStorage
+                    const cached = localStorage.getItem('lastInvoice');
+                    if (cached) {
+                        try { invoiceData = JSON.parse(cached); } catch (e) {}
+                    }
+
+                    // If we have orderId, fetch from Firebase
+                    if (orderId) {
+                        const snapshot = await db.collection('invoices')
+                            .where('orderId', '==', parseInt(orderId))
+                            .limit(1)
+                            .get();
+
+                        if (!snapshot.empty) {
+                            invoiceData = snapshot.docs[0].data();
+                        }
+                    }
+
+                    if (!invoiceData) {
+                        document.getElementById('invoiceId').textContent = 'NOT FOUND';
+                        return;
+                    }
+
+                    // Fill in data
+                    const date = invoiceData.createdAt?.toDate?.() || new Date();
+                    const orderIdNum = invoiceData.orderId || '0000';
+                    const price = invoiceData.price || 0;
+                    const naira = invoiceData.nairaPrice || (price * 1440);
+                    const status = invoiceData.status || 'pending';
+
+                    document.getElementById('invoiceId').textContent = 'INV-' + orderIdNum;
+                    document.getElementById('invoiceDate').textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                    
+                    const statusEl = document.getElementById('invoiceStatus');
+                    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+                    statusEl.className = 'status-badge status-' + status;
+
+                    document.getElementById('customerFieldLabel').textContent = (invoiceData.userFieldLabel || 'Information') + ':';
+                    document.getElementById('customerInfo').textContent = invoiceData.userInfo || '--';
+                    document.getElementById('orderId').textContent = orderIdNum;
+                    document.getElementById('paymentMethod').textContent = invoiceData.paymentMethod || invoiceData.currency || 'Crypto';
+                    
+                    document.getElementById('itemProductName').textContent = invoiceData.productName || 'Product';
+                    document.getElementById('itemPlanName').textContent = invoiceData.plan || 'Standard';
+                    document.getElementById('itemPrice').textContent = price.toFixed(2);
+                    document.getElementById('subTotal').textContent = price.toFixed(2);
+                    document.getElementById('nairaTotal').textContent = naira.toLocaleString();
+                    document.getElementById('grandTotal').textContent = price.toFixed(2);
+
+                    // Screenshot
+                    if (invoiceData.screenshotUrl) {
+                        document.getElementById('invoiceScreenshot').src = invoiceData.screenshotUrl;
+                    } else {
+                        document.getElementById('screenshotSection').style.display = 'none';
+                    }
+
+                    console.log('✅ Invoice loaded:', invoiceData);
+
+                } catch (error) {
+                    console.error('❌ Error:', error);
+                }
+            }
+
+            loadInvoice();
+
+            // ============================================================
+            // ===== PRINT =====
+            // ============================================================
+            window.printInvoice = function() {
+                window.print();
+            };
+
+            // ============================================================
+            // ===== DOWNLOAD PDF =====
+            // ============================================================
+            window.downloadPDF = function() {
+                const element = document.getElementById('invoiceContent');
+                const opt = {
+                    margin: 0.5,
+                    filename: 'Invoice-' + (orderId || 'PremiumStore') + '.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(element).save();
+            };
+        });
+    </script>
+
+</body>
+</html>
