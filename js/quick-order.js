@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const db = firebase.firestore();
 
     // ============================================================
+    // ===== BASE URL FOR INVOICE LINK =====
+    // ============================================================
+    const INVOICE_BASE_URL = 'https://projectstore1.github.io/PrimeNest-store/invoice.html?orderId=';
+
+    // ============================================================
     // ===== PLAN SELECTOR =====
     // ============================================================
     const planOptions = document.querySelectorAll('.plan-option');
@@ -31,21 +36,19 @@ document.addEventListener('DOMContentLoaded', function() {
     async function generateOrderId() {
         try {
             const counterDoc = await db.collection('settings').doc('orderCounter').get();
-
             if (counterDoc.exists) {
-                const currentCounter = counterDoc.data().counter || 0;
-                const newCounter = currentCounter + 1;
-                await db.collection('settings').doc('orderCounter').set({ counter: newCounter }, { merge: true });
-                return newCounter;
+                const current = counterDoc.data().counter || 0;
+                const next = current + 1;
+                await db.collection('settings').doc('orderCounter').set({ counter: next }, { merge: true });
+                return next;
             } else {
-                const ordersSnap = await db.collection('orders').get();
-                const totalOrders = ordersSnap.size;
-                const startCounter = totalOrders + 1;
-                await db.collection('settings').doc('orderCounter').set({ counter: startCounter });
-                return startCounter;
+                const snap = await db.collection('orders').get();
+                const start = snap.size + 1;
+                await db.collection('settings').doc('orderCounter').set({ counter: start });
+                return start;
             }
         } catch (error) {
-            console.error('Error generating order ID:', error);
+            console.error('ID error:', error);
             return Date.now().toString().slice(-6);
         }
     }
@@ -70,16 +73,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = doc.data();
                 total++;
 
-                if (data.status === 'completed') {
-                    completed++;
-                }
+                if (data.status === 'completed') completed++;
 
                 if (data.createdAt) {
                     const orderDate = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
                     orderDate.setHours(0, 0, 0, 0);
-                    if (orderDate.getTime() === today.getTime()) {
-                        todayCount++;
-                    }
+                    if (orderDate.getTime() === today.getTime()) todayCount++;
                 }
             });
 
@@ -176,30 +175,64 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // ============================================================
+    // ===== SHOW TOAST =====
+    // ============================================================
+    function showToast(msg) {
+        const toast = document.getElementById('toastMsg');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // ============================================================
+    // ===== COPY INVOICE LINK =====
+    // ============================================================
+    document.getElementById('copyInvoiceLinkBtn').addEventListener('click', function() {
+        const input = document.getElementById('invoiceLinkInput');
+        const btn = this;
+
+        const fallback = () => {
+            input.select();
+            input.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            showCopiedState();
+        };
+
+        const showCopiedState = () => {
+            btn.classList.add('copied');
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            showToast('✅ Invoice link copied!');
+
+            setTimeout(() => {
+                btn.classList.remove('copied');
+                btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            }, 2000);
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value).then(showCopiedState).catch(fallback);
+        } else {
+            fallback();
+        }
+    });
+
+    // ============================================================
     // ===== SUBMIT ORDER =====
     // ============================================================
     const form = document.getElementById('quickOrderForm');
     const submitBtn = document.getElementById('submitBtn');
     const successMsg = document.getElementById('successMsg');
+    const invoiceLinkBox = document.getElementById('invoiceLinkBox');
+    const invoiceLinkInput = document.getElementById('invoiceLinkInput');
 
-    // Remove any existing event listeners
-    form.removeEventListener('submit', handleSubmit);
-    form.addEventListener('submit', handleSubmit);
-
-    async function handleSubmit(e) {
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        e.stopPropagation();
-
-        console.log('📤 Submit button clicked');
 
         const plan = document.getElementById('selectedPlan').value;
         const price = parseFloat(document.getElementById('orderPrice').value);
         const userInfo = document.getElementById('userInfo').value.trim();
         const status = document.getElementById('orderStatus').value;
 
-        console.log('📋 Form data:', { plan, price, userInfo, status });
-
-        // Validation
         if (!userInfo) {
             alert('❌ Please enter X username or profile link.');
             return;
@@ -210,7 +243,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        // Disable button
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
 
@@ -224,19 +256,56 @@ document.addEventListener('DOMContentLoaded', function() {
                 planId: plan,
                 plan: plan,
                 userInfo: userInfo,
+                userFieldLabel: 'X Username',
                 price: price,
+                nairaPrice: price * 1440,
+                currency: 'crypto',
+                paymentMethod: 'Admin Created',
                 status: status,
+                invoiceCreated: true,
+                createdBy: 'admin',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            console.log('📤 Saving order:', data);
+            // Save order
+            const orderRef = await db.collection('orders').add(data);
 
-            await db.collection('orders').add(data);
+            // Save invoice
+            const invoiceData = {
+                invoiceId: 'INV-' + orderId,
+                orderId: orderId,
+                orderDocId: orderRef.id,
+                productName: 'X Premium',
+                plan: plan,
+                userInfo: userInfo,
+                userFieldLabel: 'X Username',
+                price: price,
+                nairaPrice: price * 1440,
+                currency: 'crypto',
+                paymentMethod: 'Admin Created',
+                status: status,
+                createdBy: 'admin',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            await db.collection('invoices').add(invoiceData);
+
+            // Generate Invoice Link
+            const invoiceLink = INVOICE_BASE_URL + orderId;
+
+            // Show link in box
+            invoiceLinkInput.value = invoiceLink;
+            invoiceLinkBox.classList.add('show');
 
             // Show success
             successMsg.classList.add('show');
-            successMsg.innerHTML = '<i class="fas fa-check-circle"></i> Order #' + orderId + ' added!';
+            successMsg.innerHTML = '<i class="fas fa-check-circle"></i> Order #' + orderId + ' added successfully!';
+
+            // Auto-copy link
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(invoiceLink).catch(() => {});
+            }
 
             // Clear input
             document.getElementById('userInfo').value = '';
@@ -250,17 +319,16 @@ document.addEventListener('DOMContentLoaded', function() {
             await loadOrders();
             await updateStats();
 
-            console.log('✅ Order added successfully:', orderId);
+            console.log('✅ Order added:', orderId);
 
         } catch (error) {
             console.error('❌ Error:', error);
             alert('❌ Error adding order: ' + error.message);
         }
 
-        // Enable button
         submitBtn.disabled = false;
         submitBtn.innerHTML = '<i class="fas fa-bolt"></i> Add Order';
-    }
+    });
 
     // ============================================================
     // ===== INIT =====
@@ -268,6 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadOrders();
     updateStats();
 
+    // Auto refresh every 30 seconds
     setInterval(() => {
         loadOrders();
         updateStats();
