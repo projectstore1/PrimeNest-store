@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('💳 Payment page loaded');
 
-    // ===== FIREBASE =====
     const db = firebase.firestore();
-    const storage = firebase.storage();
 
     // ============================================================
     // ===== GET PRODUCT FROM LOCALSTORAGE =====
@@ -57,44 +55,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     loadUserField();
-
-    // ============================================================
-    // ===== SCREENSHOT UPLOAD =====
-    // ============================================================
-    let screenshotFile = null;
-    const screenshotUpload = document.getElementById('screenshotUpload');
-    const screenshotInput = document.getElementById('screenshotInput');
-    const screenshotPreview = document.getElementById('screenshotPreview');
-
-    screenshotUpload.addEventListener('click', () => screenshotInput.click());
-
-    screenshotInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (!file) return;
-
-        if (file.size > 5 * 1024 * 1024) {
-            alert('❌ File too large (Max 5MB)');
-            return;
-        }
-
-        if (!file.type.startsWith('image/')) {
-            alert('❌ Please select an image file');
-            return;
-        }
-
-        screenshotFile = file;
-        screenshotUpload.classList.add('has-file');
-        screenshotUpload.querySelector('.upload-text').textContent = '✅ ' + file.name;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            screenshotPreview.src = e.target.result;
-            screenshotPreview.classList.add('show');
-        };
-        reader.readAsDataURL(file);
-
-        console.log('📸 Screenshot selected:', file.name);
-    });
 
     // ============================================================
     // ===== CURRENCY SELECTION =====
@@ -173,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ============================================================
-    // ===== CONFIRM ORDER =====
+    // ===== CONFIRM ORDER (Screenshot ছাড়া) =====
     // ============================================================
     const confirmBtn = document.getElementById('confirmOrderBtn');
 
@@ -181,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         console.log('🚀 Confirm clicked');
 
-        // ===== VALIDATION =====
+        // Validation
         const userInfo = document.getElementById('userInfoInput').value.trim();
         const userFieldLabel = document.getElementById('userInfoInput').dataset.fieldLabel || 'Information';
 
@@ -191,30 +151,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (!screenshotFile) {
-            alert('❌ Please upload payment screenshot');
-            return;
-        }
-
-        // ===== DISABLE BUTTON =====
         confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Invoice...';
 
         try {
-            // ===== STEP 1: UPLOAD SCREENSHOT =====
-            console.log('📤 Uploading screenshot...');
-            const fileName = `screenshots/${Date.now()}_${screenshotFile.name}`;
-            const ref = storage.ref(fileName);
-            const uploadTask = await ref.put(screenshotFile);
-            const screenshotUrl = await uploadTask.ref.getDownloadURL();
-            console.log('✅ Screenshot URL:', screenshotUrl);
-
-            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Invoice...';
-
-            // ===== STEP 2: GENERATE ID =====
+            // ===== STEP 1: GENERATE ID =====
             const orderId = await generateOrderId();
 
-            // ===== STEP 3: SAVE ORDER =====
+            // ===== STEP 2: SAVE ORDER =====
             console.log('💾 Saving order...');
             const orderData = {
                 orderId: orderId,
@@ -227,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: usdPrice,
                 nairaPrice: nairaPrice,
                 currency: selectedCurrency,
-                screenshotUrl: screenshotUrl,
                 paymentMethod: selectedCurrency === 'crypto' ? 'Crypto' : 'Nigeria Bank Transfer',
                 status: 'pending',
                 invoiceCreated: true,
@@ -238,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const orderRef = await db.collection('orders').add(orderData);
             console.log('✅ Order saved:', orderRef.id);
 
-            // ===== STEP 4: SAVE INVOICE =====
+            // ===== STEP 3: SAVE INVOICE =====
             console.log('📄 Creating invoice...');
             const invoiceData = {
                 invoiceId: 'INV-' + orderId,
@@ -251,7 +194,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: usdPrice,
                 nairaPrice: nairaPrice,
                 currency: selectedCurrency,
-                screenshotUrl: screenshotUrl,
                 paymentMethod: selectedCurrency === 'crypto' ? 'Crypto' : 'Nigeria Bank Transfer',
                 status: 'pending',
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -260,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             await db.collection('invoices').add(invoiceData);
             console.log('✅ Invoice created');
 
-            // ===== STEP 5: REDIRECT =====
+            // ===== STEP 4: REDIRECT =====
             localStorage.setItem('lastInvoice', JSON.stringify(invoiceData));
             localStorage.removeItem('selectedProduct');
 
@@ -274,11 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let msg = '❌ Error: ' + error.message;
 
-            if (error.code === 'storage/unauthorized') {
-                msg = '❌ STORAGE RULES নেই!\n\nFirebase Console → Storage → Rules:\n\nrules_version = \'2\';\nservice firebase.storage {\n  match /b/{bucket}/o {\n    match /{allPaths=**} {\n      allow read, write: if true;\n    }\n  }\n}';
-            } else if (error.code === 'storage/unknown') {
-                msg = '❌ STORAGE ENABLE করা হয়নি!\n\nFirebase Console → Storage → Get Started ক্লিক করুন';
-            } else if (error.code === 'permission-denied') {
+            if (error.code === 'permission-denied') {
                 msg = '❌ FIRESTORE RULES নেই!\n\nFirebase Console → Firestore → Rules:\n\nrules_version = \'2\';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}';
             }
 
