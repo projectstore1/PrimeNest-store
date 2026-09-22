@@ -1,255 +1,134 @@
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('💳 Payment page loaded');
+// ============================================================
+// ===== CONFIRM ORDER =====
+// ============================================================
+const confirmBtn = document.getElementById('confirmOrderBtn');
 
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+confirmBtn.addEventListener('click', async function() {
+    console.log('🖱️ Confirm button clicked');
 
-    // ============================================================
-    // ===== GET PRODUCT DATA =====
-    // ============================================================
-    let productData = localStorage.getItem('selectedProduct');
-    let product = null;
+    const userInfo = document.getElementById('userInfoInput').value.trim();
+    const userFieldLabel = document.getElementById('userInfoInput').dataset.fieldLabel || 'Information';
 
-    if (productData) {
-        try { product = JSON.parse(productData); } catch (e) { console.error(e); }
-    }
-
-    if (!product) {
-        window.location.href = 'index.html';
+    if (!userInfo) {
+        alert(`❌ Please enter your ${userFieldLabel}`);
         return;
     }
 
-    // Display Product
-    const usdPrice = product.price || 0;
-    const nairaPrice = usdPrice * 1440;
-
-    document.getElementById('productName').textContent = product.name || 'Product';
-    document.getElementById('itemName').textContent = product.itemName || 'Standard';
-    document.getElementById('productPrice').textContent = usdPrice.toFixed(2);
-    document.getElementById('nairaPrice').textContent = nairaPrice.toLocaleString();
-
-    // ============================================================
-    // ===== LOAD USER FIELD FROM PRODUCT =====
-    // ============================================================
-    async function loadUserField() {
-        try {
-            const doc = await db.collection('products').doc(product.id).get();
-            if (doc.exists) {
-                const data = doc.data();
-                const label = data.userFieldLabel || 'Information';
-                const placeholder = data.userFieldPlaceholder || 'Enter your info';
-                const required = data.userFieldRequired !== false;
-
-                document.getElementById('userFieldLabelText').innerHTML = 
-                    label + (required ? ' <span class="required">*</span>' : '');
-                document.getElementById('userInfoInput').placeholder = placeholder;
-                document.getElementById('userInfoInput').required = required;
-                document.getElementById('userInfoInput').dataset.fieldLabel = label;
-            }
-        } catch (error) {
-            console.error('Error loading user field:', error);
-        }
+    if (!screenshotFile) {
+        alert('❌ Please upload payment screenshot');
+        return;
     }
-    loadUserField();
 
-    // ============================================================
-    // ===== SCREENSHOT UPLOAD =====
-    // ============================================================
-    let screenshotFile = null;
-    const screenshotUpload = document.getElementById('screenshotUpload');
-    const screenshotInput = document.getElementById('screenshotInput');
-    const screenshotPreview = document.getElementById('screenshotPreview');
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Step 1/3: Uploading...';
 
-    screenshotUpload.addEventListener('click', () => screenshotInput.click());
-
-    screenshotInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (!file) return;
-
-        if (file.size > 5 * 1024 * 1024) {
-            alert('❌ File size must be less than 5MB');
-            return;
+    try {
+        // ===== STEP 1: Storage Check =====
+        console.log('🔥 Step 1: Checking Firebase Storage...');
+        
+        if (typeof firebase.storage !== 'function') {
+            throw new Error('Firebase Storage SDK not loaded! Add firebase-storage-compat.js script tag.');
         }
+        
+        const storage = firebase.storage();
+        console.log('✅ Storage initialized');
 
-        screenshotFile = file;
-        screenshotUpload.classList.add('has-file');
+        // ===== STEP 2: Upload Screenshot =====
+        console.log('📤 Step 2: Uploading screenshot...');
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Step 2/3: Uploading...';
+        
+        const timestamp = Date.now();
+        const fileName = `screenshots/${timestamp}_${screenshotFile.name}`;
+        const storageRef = storage.ref(fileName);
+        
+        console.log('📤 Uploading to:', fileName);
+        const uploadTask = await storageRef.put(screenshotFile);
+        const screenshotUrl = await uploadTask.ref.getDownloadURL();
+        console.log('✅ Screenshot uploaded:', screenshotUrl);
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            screenshotPreview.src = e.target.result;
-            screenshotPreview.classList.add('show');
+        // ===== STEP 3: Generate Order ID =====
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Step 3/3: Creating Invoice...';
+        console.log('🆔 Generating Order ID...');
+        const orderId = await generateOrderId();
+        console.log('✅ Order ID:', orderId);
+
+        // ===== STEP 4: Save Order =====
+        console.log('💾 Saving order...');
+        const orderData = {
+            orderId: orderId,
+            productId: product.id,
+            productName: product.name,
+            planId: product.itemId || '',
+            plan: product.itemName || 'Standard',
+            userInfo: userInfo,
+            userFieldLabel: userFieldLabel,
+            price: usdPrice,
+            nairaPrice: nairaPrice,
+            currency: selectedCurrency,
+            screenshotUrl: screenshotUrl,
+            paymentMethod: selectedCurrency === 'crypto' ? 'Crypto' : 'Nigeria Bank Transfer',
+            status: 'pending',
+            invoiceCreated: true,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
-        reader.readAsDataURL(file);
-    });
 
-    // ============================================================
-    // ===== CURRENCY SELECTION =====
-    // ============================================================
-    let selectedCurrency = 'crypto';
-    const currencyCards = document.querySelectorAll('.currency-card');
-    const cryptoDetails = document.getElementById('cryptoDetails');
-    const nairaDetails = document.getElementById('nairaDetails');
+        const docRef = await db.collection('orders').add(orderData);
+        console.log('✅ Order saved:', docRef.id);
 
-    currencyCards.forEach(card => {
-        card.addEventListener('click', function() {
-            currencyCards.forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            selectedCurrency = this.dataset.currency;
+        // ===== STEP 5: Save Invoice =====
+        console.log('📄 Creating invoice...');
+        const invoiceData = {
+            invoiceId: 'INV-' + orderId,
+            orderId: orderId,
+            orderDocId: docRef.id,
+            productName: product.name,
+            plan: product.itemName || 'Standard',
+            userInfo: userInfo,
+            userFieldLabel: userFieldLabel,
+            price: usdPrice,
+            nairaPrice: nairaPrice,
+            currency: selectedCurrency,
+            screenshotUrl: screenshotUrl,
+            paymentMethod: selectedCurrency === 'crypto' ? 'Crypto' : 'Nigeria Bank Transfer',
+            status: 'pending',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
 
-            if (selectedCurrency === 'crypto') {
-                cryptoDetails.style.display = 'block';
-                nairaDetails.style.display = 'none';
-            } else {
-                cryptoDetails.style.display = 'none';
-                nairaDetails.style.display = 'block';
-            }
-        });
-    });
+        await db.collection('invoices').add(invoiceData);
+        console.log('✅ Invoice created');
 
-    // ============================================================
-    // ===== COPY ADDRESS =====
-    // ============================================================
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const address = this.dataset.address;
-            navigator.clipboard.writeText(address).then(() => {
-                const original = this.innerHTML;
-                this.innerHTML = '<i class="fas fa-check"></i>';
-                setTimeout(() => this.innerHTML = original, 1500);
-            });
-        });
-    });
+        // ===== STEP 6: Redirect =====
+        localStorage.setItem('lastInvoice', JSON.stringify(invoiceData));
+        localStorage.removeItem('selectedProduct');
 
-    // ============================================================
-    // ===== GENERATE ORDER ID =====
-    // ============================================================
-    async function generateOrderId() {
-        try {
-            const counterDoc = await db.collection('settings').doc('orderCounter').get();
-            if (counterDoc.exists) {
-                const currentCounter = counterDoc.data().counter || 0;
-                const newCounter = currentCounter + 1;
-                await db.collection('settings').doc('orderCounter').set({ counter: newCounter }, { merge: true });
-                return newCounter;
-            } else {
-                const ordersSnap = await db.collection('orders').get();
-                const startCounter = ordersSnap.size + 1;
-                await db.collection('settings').doc('orderCounter').set({ counter: startCounter });
-                return startCounter;
-            }
-        } catch (error) {
-            return Date.now().toString().slice(-6);
+        console.log('🚀 Redirecting to invoice-link.html');
+        window.location.href = 'invoice-link.html?orderId=' + orderId;
+
+    } catch (error) {
+        console.error('❌❌❌ ERROR OCCURRED ❌❌❌');
+        console.error('Error Name:', error.name);
+        console.error('Error Code:', error.code);
+        console.error('Error Message:', error.message);
+        console.error('Full Error:', error);
+
+        let errorMsg = '❌ Error: ' + error.message;
+
+        if (error.code === 'storage/unauthorized') {
+            errorMsg = '❌ STORAGE RULES নেই!\n\nFirebase Console → Storage → Rules এ যান এবং এই Rules দিন:\n\nallow read, write: if true;';
+        } else if (error.code === 'storage/unknown') {
+            errorMsg = '❌ STORAGE ENABLE করা হয়নি!\n\nFirebase Console → Storage → Get Started ক্লিক করুন';
+        } else if (error.code === 'storage/bucket-not-found') {
+            errorMsg = '❌ STORAGE BUCKET পাওয়া যাচ্ছে না!\n\nFirebase Console → Storage Enable করুন';
+        } else if (error.code === 'permission-denied') {
+            errorMsg = '❌ FIRESTORE RULES নেই!\n\nFirebase Console → Firestore → Rules এ allow read, write: if true; দিন';
+        } else if (error.message.includes('Storage SDK')) {
+            errorMsg = '❌ STORAGE SDK লোড হয়নি!\n\npayment.html এ এই লাইন যোগ করুন:\n<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>';
         }
+
+        alert(errorMsg);
+
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Order & Get Invoice';
     }
-
-    // ============================================================
-    // ===== CONFIRM ORDER =====
-    // ============================================================
-    const confirmBtn = document.getElementById('confirmOrderBtn');
-
-    confirmBtn.addEventListener('click', async function() {
-        // Validation
-        const userInfo = document.getElementById('userInfoInput').value.trim();
-        const userFieldLabel = document.getElementById('userInfoInput').dataset.fieldLabel || 'Information';
-
-        if (!userInfo) {
-            alert(`❌ Please enter your ${userFieldLabel}`);
-            document.getElementById('userInfoInput').focus();
-            return;
-        }
-
-        if (!screenshotFile) {
-            alert('❌ Please upload payment screenshot');
-            return;
-        }
-
-        confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-
-        try {
-            // 1. Upload Screenshot to Firebase Storage
-            console.log('📤 Uploading screenshot...');
-            const timestamp = Date.now();
-            const fileName = `screenshots/${timestamp}_${screenshotFile.name}`;
-            const storageRef = storage.ref(fileName);
-            const uploadTask = await storageRef.put(screenshotFile);
-            const screenshotUrl = await uploadTask.ref.getDownloadURL();
-            console.log('✅ Screenshot uploaded:', screenshotUrl);
-
-            // 2. Generate Order ID
-            const orderId = await generateOrderId();
-
-            // 3. Save Order to Firestore
-            const orderData = {
-                orderId: orderId,
-                productId: product.id,
-                productName: product.name,
-                planId: product.itemId || '',
-                plan: product.itemName || 'Standard',
-                userInfo: userInfo,
-                userFieldLabel: userFieldLabel,
-                price: usdPrice,
-                nairaPrice: nairaPrice,
-                currency: selectedCurrency,
-                screenshotUrl: screenshotUrl,
-                paymentMethod: selectedCurrency === 'crypto' ? 'Crypto' : 'Nigeria Bank Transfer',
-                status: 'pending',
-                invoiceCreated: true,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            const docRef = await db.collection('orders').add(orderData);
-            console.log('✅ Order saved:', docRef.id);
-
-            // 4. Save Invoice Data
-            const invoiceData = {
-                invoiceId: 'INV-' + orderId,
-                orderId: orderId,
-                orderDocId: docRef.id,
-                productName: product.name,
-                plan: product.itemName || 'Standard',
-                userInfo: userInfo,
-                userFieldLabel: userFieldLabel,
-                price: usdPrice,
-                nairaPrice: nairaPrice,
-                currency: selectedCurrency,
-                screenshotUrl: screenshotUrl,
-                status: 'pending',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            await db.collection('invoices').add(invoiceData);
-            console.log('✅ Invoice created');
-
-            // 5. Clear localStorage
-            localStorage.removeItem('selectedProduct');
-
-            // 6. Redirect to Invoice Page
-            localStorage.setItem('lastInvoice', JSON.stringify(invoiceData));
-            window.location.href = 'invoice.html?orderId=' + orderId;
-
-        } catch (error) {
-            console.error('❌ Error:', error);
-            alert('❌ Error: ' + error.message);
-            confirmBtn.disabled = false;
-            confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Order & Get Invoice';
-        }
-    });
-
-    // ============================================================
-    // ===== THEME TOGGLE =====
-    // ============================================================
-    const themeToggle = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-
-    themeToggle.addEventListener('click', function() {
-        const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('theme', next);
-        themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-    });
 });
