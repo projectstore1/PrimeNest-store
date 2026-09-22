@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="Assets/css/style.css">
     <style>
+        /* ===== PAYMENT PAGE STYLES ===== */
         .payment-container {
             max-width: 700px;
             margin: 30px auto;
@@ -20,19 +21,28 @@
             color: var(--text-primary);
             margin-bottom: 24px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
+        .payment-container h2 i { color: var(--accent); }
+
         .payment-summary {
             background: var(--bg-primary);
             padding: 20px;
             border-radius: 16px;
             margin-bottom: 24px;
+            border: 1px solid var(--border-color);
         }
         .payment-summary .row {
             display: flex;
             justify-content: space-between;
-            padding: 6px 0;
+            padding: 8px 0;
             color: var(--text-primary);
+            border-bottom: 1px dashed var(--border-color);
         }
+        .payment-summary .row:last-child { border-bottom: none; }
         .payment-summary .row .label { color: var(--text-muted); }
         .payment-summary .row .value { font-weight: 700; }
         .payment-summary .row .price-usd { color: var(--accent); }
@@ -69,7 +79,9 @@
             border: 2px solid transparent;
             transition: all 0.2s;
             color: var(--text-primary);
+            user-select: none;
         }
+        .currency-card:hover { border-color: var(--accent); }
         .currency-card.active {
             border-color: var(--accent);
             background: var(--notice-bg);
@@ -78,7 +90,9 @@
             font-size: 1.8rem;
             display: block;
             margin-bottom: 6px;
+            color: var(--accent);
         }
+        .currency-card span { font-weight: 700; }
 
         .address-box {
             background: var(--bg-secondary);
@@ -108,16 +122,19 @@
             font-size: 0.8rem;
             word-break: break-all;
             color: var(--text-primary);
+            font-family: 'Courier New', monospace;
         }
         .copy-btn {
-            background: none;
+            background: var(--accent);
             border: none;
             cursor: pointer;
-            color: var(--accent);
-            font-size: 1rem;
-            padding: 4px 8px;
+            color: white;
+            font-size: 0.9rem;
+            padding: 6px 12px;
             border-radius: 8px;
+            transition: all 0.2s;
         }
+        .copy-btn:hover { background: var(--accent-hover); }
 
         .user-field { margin-bottom: 16px; }
         .user-field label {
@@ -177,17 +194,19 @@
         }
 
         @media (max-width: 600px) {
-            .payment-container { padding: 20px; margin: 16px; }
+            .payment-container { padding: 20px; margin: 16px; border-radius: 20px; }
             .currency-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
+    <!-- THEME TOGGLE -->
     <div class="theme-toggle" id="themeToggle">
         <i class="fas fa-moon"></i>
     </div>
 
+    <!-- HEADER -->
     <header class="header">
         <div class="container">
             <div class="logo">
@@ -201,6 +220,7 @@
         </div>
     </header>
 
+    <!-- MAIN -->
     <main class="container">
         <div class="payment-container">
             <h2><i class="fas fa-credit-card"></i> Complete Payment</h2>
@@ -238,11 +258,11 @@
             <div class="section-box">
                 <h3><i class="fas fa-coins"></i> Select Payment Currency</h3>
                 <div class="currency-grid">
-                    <div class="currency-card active" data-currency="crypto">
+                    <div class="currency-card active" id="cryptoCard" data-currency="crypto">
                         <i class="fab fa-bitcoin"></i>
                         <span>🪙 Crypto</span>
                     </div>
-                    <div class="currency-card" data-currency="naira">
+                    <div class="currency-card" id="nairaCard" data-currency="naira">
                         <i class="fas fa-money-bill-wave"></i>
                         <span>🇳🇬 Naira</span>
                     </div>
@@ -251,6 +271,7 @@
 
             <!-- Payment Details -->
             <div class="section-box" id="paymentDetails">
+                <!-- Crypto -->
                 <div id="cryptoDetails">
                     <h3><i class="fab fa-bitcoin"></i> Crypto Payment</h3>
                     <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Accepted: <strong>USDT, USDC, SOL</strong></p>
@@ -276,6 +297,8 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Naira -->
                 <div id="nairaDetails" style="display:none;">
                     <h3><i class="fas fa-money-bill-wave"></i> Nigeria Bank Transfer</h3>
                     <div class="address-box">
@@ -301,6 +324,7 @@
                 </div>
             </div>
 
+            <!-- Confirm Button -->
             <button class="btn-confirm" id="confirmOrderBtn">
                 <i class="fas fa-check-circle"></i> Confirm Order & Get Invoice
             </button>
@@ -311,10 +335,264 @@
         </div>
     </main>
 
-    <!-- Firebase SDKs (Storage ছাড়া) -->
+    <!-- FIREBASE SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="Assets/js/firebase-config.js"></script>
-    <script src="Assets/js/payment.js"></script>
+
+    <!-- PAYMENT JS (Inline for guaranteed work) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('💳 Payment page loaded');
+
+            // ===== FIREBASE =====
+            const db = firebase.firestore();
+
+            // ============================================================
+            // ===== GET PRODUCT FROM LOCALSTORAGE =====
+            // ============================================================
+            let productData = localStorage.getItem('selectedProduct');
+            let product = null;
+
+            if (productData) {
+                try { product = JSON.parse(productData); } catch (e) { console.error(e); }
+            }
+
+            if (!product) {
+                console.log('❌ No product, redirecting...');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            console.log('✅ Product loaded:', product);
+
+            // ============================================================
+            // ===== DISPLAY PRODUCT =====
+            // ============================================================
+            const usdPrice = product.price || 0;
+            const nairaPrice = usdPrice * 1440;
+
+            document.getElementById('productName').textContent = product.name || 'Product';
+            document.getElementById('itemName').textContent = product.itemName || 'Standard';
+            document.getElementById('productPrice').textContent = usdPrice.toFixed(2);
+            document.getElementById('nairaPrice').textContent = nairaPrice.toLocaleString();
+
+            // ============================================================
+            // ===== LOAD USER FIELD FROM PRODUCT =====
+            // ============================================================
+            async function loadUserField() {
+                try {
+                    const doc = await db.collection('products').doc(product.id).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        const label = data.userFieldLabel || 'Information';
+                        const placeholder = data.userFieldPlaceholder || 'Enter your info';
+                        const required = data.userFieldRequired !== false;
+
+                        document.getElementById('userFieldLabelText').innerHTML = 
+                            label + (required ? ' <span class="required">*</span>' : '');
+                        document.getElementById('userInfoInput').placeholder = placeholder;
+                        document.getElementById('userInfoInput').dataset.fieldLabel = label;
+                    }
+                } catch (error) {
+                    console.error('Error loading user field:', error);
+                }
+            }
+            loadUserField();
+
+            // ============================================================
+            // ===== CURRENCY SELECTION =====
+            // ============================================================
+            let selectedCurrency = 'crypto';
+            const cryptoCard = document.getElementById('cryptoCard');
+            const nairaCard = document.getElementById('nairaCard');
+            const cryptoDetails = document.getElementById('cryptoDetails');
+            const nairaDetails = document.getElementById('nairaDetails');
+
+            cryptoCard.addEventListener('click', function() {
+                cryptoCard.classList.add('active');
+                nairaCard.classList.remove('active');
+                selectedCurrency = 'crypto';
+                cryptoDetails.style.display = 'block';
+                nairaDetails.style.display = 'none';
+                console.log('💱 Currency: crypto');
+            });
+
+            nairaCard.addEventListener('click', function() {
+                nairaCard.classList.add('active');
+                cryptoCard.classList.remove('active');
+                selectedCurrency = 'naira';
+                cryptoDetails.style.display = 'none';
+                nairaDetails.style.display = 'block';
+                console.log('💱 Currency: naira');
+            });
+
+            // ============================================================
+            // ===== COPY ADDRESS =====
+            // ============================================================
+            document.querySelectorAll('.copy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const address = this.dataset.address;
+                    const btnEl = this;
+
+                    const copyText = (text) => {
+                        if (navigator.clipboard) {
+                            navigator.clipboard.writeText(text).then(() => {
+                                btnEl.innerHTML = '<i class="fas fa-check"></i>';
+                                setTimeout(() => btnEl.innerHTML = '<i class="fas fa-copy"></i>', 1500);
+                            }).catch(() => {
+                                fallbackCopy(text);
+                            });
+                        } else {
+                            fallbackCopy(text);
+                        }
+                    };
+
+                    const fallbackCopy = (text) => {
+                        const temp = document.createElement('textarea');
+                        temp.value = text;
+                        document.body.appendChild(temp);
+                        temp.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(temp);
+                        btnEl.innerHTML = '<i class="fas fa-check"></i>';
+                        setTimeout(() => btnEl.innerHTML = '<i class="fas fa-copy"></i>', 1500);
+                    };
+
+                    copyText(address);
+                });
+            });
+
+            // ============================================================
+            // ===== GENERATE ORDER ID =====
+            // ============================================================
+            async function generateOrderId() {
+                try {
+                    const counterDoc = await db.collection('settings').doc('orderCounter').get();
+                    if (counterDoc.exists) {
+                        const current = counterDoc.data().counter || 0;
+                        const next = current + 1;
+                        await db.collection('settings').doc('orderCounter').set({ counter: next }, { merge: true });
+                        console.log('🆔 Order ID:', next);
+                        return next;
+                    } else {
+                        const snap = await db.collection('orders').get();
+                        const start = snap.size + 1;
+                        await db.collection('settings').doc('orderCounter').set({ counter: start });
+                        console.log('🆔 Order ID (new):', start);
+                        return start;
+                    }
+                } catch (error) {
+                    console.error('ID error:', error);
+                    return Date.now().toString().slice(-6);
+                }
+            }
+
+            // ============================================================
+            // ===== CONFIRM ORDER =====
+            // ============================================================
+            const confirmBtn = document.getElementById('confirmOrderBtn');
+
+            confirmBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                console.log('🚀 Confirm clicked');
+
+                const userInfo = document.getElementById('userInfoInput').value.trim();
+                const userFieldLabel = document.getElementById('userInfoInput').dataset.fieldLabel || 'Information';
+
+                if (!userInfo) {
+                    alert('❌ Please enter your ' + userFieldLabel);
+                    document.getElementById('userInfoInput').focus();
+                    return;
+                }
+
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Invoice...';
+
+                try {
+                    const orderId = await generateOrderId();
+
+                    const orderData = {
+                        orderId: orderId,
+                        productId: product.id,
+                        productName: product.name,
+                        planId: product.itemId || '',
+                        plan: product.itemName || 'Standard',
+                        userInfo: userInfo,
+                        userFieldLabel: userFieldLabel,
+                        price: usdPrice,
+                        nairaPrice: nairaPrice,
+                        currency: selectedCurrency,
+                        paymentMethod: selectedCurrency === 'crypto' ? 'Crypto' : 'Nigeria Bank Transfer',
+                        status: 'pending',
+                        invoiceCreated: true,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    const orderRef = await db.collection('orders').add(orderData);
+                    console.log('✅ Order saved:', orderRef.id);
+
+                    const invoiceData = {
+                        invoiceId: 'INV-' + orderId,
+                        orderId: orderId,
+                        orderDocId: orderRef.id,
+                        productName: product.name,
+                        plan: product.itemName || 'Standard',
+                        userInfo: userInfo,
+                        userFieldLabel: userFieldLabel,
+                        price: usdPrice,
+                        nairaPrice: nairaPrice,
+                        currency: selectedCurrency,
+                        paymentMethod: selectedCurrency === 'crypto' ? 'Crypto' : 'Nigeria Bank Transfer',
+                        status: 'pending',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await db.collection('invoices').add(invoiceData);
+                    console.log('✅ Invoice created');
+
+                    localStorage.setItem('lastInvoice', JSON.stringify(invoiceData));
+                    localStorage.removeItem('selectedProduct');
+
+                    console.log('🚀 Redirecting...');
+                    window.location.href = 'invoice-link.html?orderId=' + orderId;
+
+                } catch (error) {
+                    console.error('❌ ERROR:', error);
+                    console.error('Code:', error.code);
+                    console.error('Message:', error.message);
+
+                    let msg = '❌ Error: ' + error.message;
+
+                    if (error.code === 'permission-denied') {
+                        msg = '❌ FIRESTORE RULES নেই!\n\nFirebase Console → Firestore → Rules:\n\nrules_version = \'2\';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} {\n      allow read, write: if true;\n    }\n  }\n}';
+                    }
+
+                    alert(msg);
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm Order & Get Invoice';
+                }
+            });
+
+            // ============================================================
+            // ===== THEME TOGGLE =====
+            // ============================================================
+            const themeToggle = document.getElementById('themeToggle');
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+
+            themeToggle.addEventListener('click', function() {
+                const current = document.documentElement.getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+                themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            });
+
+            console.log('✅ Payment page ready!');
+        });
+    </script>
 </body>
 </html>
