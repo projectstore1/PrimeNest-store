@@ -2,12 +2,291 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment - Premium Store</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Payment - PremiumStore</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="Assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        .payment-container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: var(--bg-secondary);
+            padding: 32px;
+            border-radius: 32px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .payment-container h2 {
+            color: var(--text-primary);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        .payment-summary {
+            background: var(--bg-primary);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .payment-summary .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            color: var(--text-primary);
+        }
+
+        .payment-summary .row .label {
+            color: var(--text-muted);
+        }
+
+        .payment-summary .row .value {
+            font-weight: 700;
+        }
+
+        .payment-summary .row .price-usd {
+            color: var(--accent);
+        }
+
+        .payment-summary .row .price-naira {
+            color: #16a34a;
+        }
+
+        .section-box {
+            background: var(--bg-primary);
+            padding: 18px 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .section-box h3 {
+            color: var(--text-primary);
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-box h3 i {
+            color: var(--accent);
+        }
+
+        .currency-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .currency-card {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+
+        .currency-card.active {
+            border-color: var(--accent);
+            background: var(--notice-bg);
+        }
+
+        .currency-card i {
+            font-size: 1.8rem;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .address-box {
+            background: var(--bg-secondary);
+            padding: 12px 14px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .address-box label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+
+        .address-copy {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-card);
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .address-copy code {
+            flex: 1;
+            font-size: 0.8rem;
+            word-break: break-all;
+            color: var(--text-primary);
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--accent);
+            font-size: 1rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .user-field {
+            margin-bottom: 16px;
+        }
+
+        .user-field label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        .user-field label .required {
+            color: #dc2626;
+        }
+
+        .user-field input,
+        .user-field textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .user-field input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        /* ===== SCREENSHOT UPLOAD ===== */
+        .screenshot-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--bg-secondary);
+        }
+
+        .screenshot-upload:hover {
+            border-color: var(--accent);
+            background: var(--notice-bg);
+        }
+
+        .screenshot-upload.has-file {
+            border-color: #22c55e;
+            background: #f0fdf4;
+        }
+
+        [data-theme="dark"] .screenshot-upload.has-file {
+            background: #14532d33;
+        }
+
+        .screenshot-upload i {
+            font-size: 2.5rem;
+            color: var(--accent);
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .screenshot-upload input[type="file"] {
+            display: none;
+        }
+
+        .screenshot-upload .upload-text {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .screenshot-upload .upload-hint {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .screenshot-preview {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 12px;
+            margin-top: 12px;
+            display: none;
+        }
+
+        .screenshot-preview.show {
+            display: block;
+            margin: 12px auto 0;
+        }
+
+        /* ===== SUBMIT BUTTON ===== */
+        .btn-confirm {
+            width: 100%;
+            padding: 16px;
+            background: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-confirm:hover:not(:disabled) {
+            background: #16a34a;
+            transform: scale(1.02);
+        }
+
+        .btn-confirm:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .notice-text {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .payment-container {
+                padding: 20px;
+                margin: 16px;
+            }
+            .currency-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+
     <div class="theme-toggle" id="themeToggle">
         <i class="fas fa-moon"></i>
     </div>
@@ -15,12 +294,12 @@
     <header class="header">
         <div class="container">
             <div class="logo">
-                <img src="https://www.image2url.com/r2/default/images/1786765708686-cd1cda4a-5889-437e-9768-20204165b150.jpg" alt="PremiumStore">
-                <span>Premium Store</span>
+                <img src="https://via.placeholder.com/40x40?text=PS" alt="PremiumStore">
+                <span>PremiumStore</span>
             </div>
             <nav class="nav">
-                <a href="PrimeNest.html"><i class="fas fa-home"></i> Home</a>
-                <a href="Order_history.html"><i class="fas fa-history"></i> Orders</a>
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="order-history.html"><i class="fas fa-history"></i> Orders</a>
             </nav>
         </div>
     </header>
@@ -28,20 +307,51 @@
     <main class="container">
         <div class="payment-container">
             <h2><i class="fas fa-credit-card"></i> Complete Payment</h2>
-            
-            <!-- Product Summary -->
-            <div class="payment-summary" id="paymentSummary">
-                <div class="product-info">
-                    <p><strong>Product:</strong> <span id="productName">Loading...</span></p>
-                    <p><strong>Item:</strong> <span id="itemName">Loading...</span></p>
-                    <p><strong>💰 USD Price:</strong> $<span id="productPrice">0.00</span></p>
-                    <p><strong>🇳🇬 Naira Price:</strong> ₦<span id="nairaPrice">0</span></p>
+
+            <!-- ===== PRODUCT SUMMARY ===== -->
+            <div class="payment-summary">
+                <div class="row">
+                    <span class="label">Product:</span>
+                    <span class="value" id="productName">Loading...</span>
+                </div>
+                <div class="row">
+                    <span class="label">Plan:</span>
+                    <span class="value" id="itemName">Loading...</span>
+                </div>
+                <div class="row">
+                    <span class="label">💰 USD Price:</span>
+                    <span class="value price-usd">$<span id="productPrice">0.00</span></span>
+                </div>
+                <div class="row">
+                    <span class="label">🇳🇬 Naira Price:</span>
+                    <span class="value price-naira">₦<span id="nairaPrice">0</span></span>
                 </div>
             </div>
 
-            <!-- Currency Selection -->
-            <div class="currency-select">
-                <h3>Select Payment Currency</h3>
+            <!-- ===== USER INFO FIELD (Dynamic from Admin) ===== -->
+            <div class="section-box">
+                <h3><i class="fas fa-user"></i> Your Information</h3>
+                <div class="user-field">
+                    <label id="userFieldLabelText">Information <span class="required">*</span></label>
+                    <input type="text" id="userInfoInput" placeholder="Enter your info" required>
+                </div>
+            </div>
+
+            <!-- ===== PAYMENT SCREENSHOT UPLOAD ===== -->
+            <div class="section-box">
+                <h3><i class="fas fa-camera"></i> Payment Screenshot <span class="required" style="color:#dc2626;">*</span></h3>
+                <div class="screenshot-upload" id="screenshotUpload">
+                    <input type="file" id="screenshotInput" accept="image/*">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <div class="upload-text">Click to upload payment screenshot</div>
+                    <div class="upload-hint">PNG, JPG up to 5MB</div>
+                </div>
+                <img id="screenshotPreview" class="screenshot-preview" alt="Screenshot Preview">
+            </div>
+
+            <!-- ===== CURRENCY SELECTION ===== -->
+            <div class="section-box">
+                <h3><i class="fas fa-coins"></i> Select Payment Currency</h3>
                 <div class="currency-grid">
                     <div class="currency-card active" data-currency="crypto">
                         <i class="fab fa-bitcoin"></i>
@@ -54,116 +364,80 @@
                 </div>
             </div>
 
-            <!-- Payment Details -->
-            <div class="payment-details" id="paymentDetails">
-                <!-- Crypto Details -->
-                <div class="crypto-details" id="cryptoDetails">
+            <!-- ===== PAYMENT DETAILS ===== -->
+            <div class="section-box" id="paymentDetails">
+                <!-- Crypto -->
+                <div id="cryptoDetails">
                     <h3><i class="fab fa-bitcoin"></i> Crypto Payment</h3>
-                    <p style="color:var(--text-muted);font-size:0.9rem;">Accepted: <strong>USDT, USDC, SOL</strong></p>
+                    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px;">Accepted: <strong>USDT, USDC, SOL</strong></p>
                     
                     <div class="address-box">
-                        <label>EVM (BEP20 / Arbitrum / Polygon / Avalanche / Optimism)</label>
+                        <label>EVM (BEP20 / Arbitrum / Polygon)</label>
                         <div class="address-copy">
-                            <code id="evmAddress">0x2711d473156609B418Fb41d340fF361A4297D278</code>
-                            <button class="copy-btn" data-address="0x2711d473156609B418Fb41d340fF361A4297D278">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                            <code>0x2711d473156609B418Fb41d340fF361A4297D278</code>
+                            <button class="copy-btn" data-address="0x2711d473156609B418Fb41d340fF361A4297D278"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
 
                     <div class="address-box">
                         <label>Aptos (USDT)</label>
                         <div class="address-copy">
-                            <code id="aptosAddress">0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218</code>
-                            <button class="copy-btn" data-address="0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                            <code>0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218</code>
+                            <button class="copy-btn" data-address="0x04290f34f95a759252a60b009fc81a2dd663b392fa9bfdfa736a52bf86545218"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
 
                     <div class="address-box">
                         <label>Solana (USDT / USDC / SOL)</label>
                         <div class="address-copy">
-                            <code id="solanaAddress">H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy</code>
-                            <button class="copy-btn" data-address="H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                            <code>H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy</code>
+                            <button class="copy-btn" data-address="H9fJSQFxMjYcWn48LmTkWtzMr7ZLFt2EXdKDNHsvyFDy"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Naira Details -->
-                <div class="naira-details" id="nairaDetails" style="display:none;">
+                <!-- Naira -->
+                <div id="nairaDetails" style="display:none;">
                     <h3><i class="fas fa-money-bill-wave"></i> Nigeria Bank Transfer</h3>
-                    
                     <div class="address-box">
                         <label>🏦 PalmPay Account</label>
                         <div class="address-copy">
-                            <code id="palmPay">6669361510</code>
-                            <button class="copy-btn" data-address="6669361510">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                            <code>6669361510</code>
+                            <button class="copy-btn" data-address="6669361510"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-
                     <div class="address-box">
                         <label>🏦 9PSB Account</label>
                         <div class="address-copy">
-                            <code id="psbAccount">6019315948</code>
-                            <button class="copy-btn" data-address="6019315948">
-                                <i class="fas fa-copy"></i>
-                            </button>
+                            <code>6019315948</code>
+                            <button class="copy-btn" data-address="6019315948"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-
                     <div class="address-box">
                         <label>Account Name</label>
                         <div class="address-copy">
-                            <code id="accountName">BillStack / Nasfam_Pay – MD ABDULLAH</code>
-                        </div>
-                    </div>
-
-                    <div class="address-box">
-                        <label>🔄 Exchange UID</label>
-                        <div class="address-copy">
-                            <code>• Bybit: 151723688</code>
-                        </div>
-                        <div class="address-copy" style="margin-top:6px;">
-                            <code>• MEXC: 18127696</code>
+                            <code>BillStack / Nasfam_Pay – MD ABDULLAH</code>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="copy-feedback" id="copyFeedback" style="display:none;text-align:center;color:var(--success);margin:8px 0;">
-                <i class="fas fa-check-circle"></i> Address copied!
-            </div>
+            <!-- ===== CONFIRM ORDER BUTTON ===== -->
+            <button class="btn-confirm" id="confirmOrderBtn">
+                <i class="fas fa-check-circle"></i> Confirm Order & Get Invoice
+            </button>
 
-            <!-- Order Buttons -->
-            <div class="order-buttons">
-                <button class="btn-order telegram" id="telegramBtn">
-                    <i class="fab fa-telegram-plane"></i> Order via Telegram
-                </button>
-                <button class="btn-order whatsapp" id="whatsappBtn">
-                    <i class="fab fa-whatsapp"></i> Order via WhatsApp
-                </button>
-            </div>
-
-            <p style="text-align:center;color:var(--text-muted);font-size:0.85rem;margin-top:16px;">
-                <i class="fas fa-info-circle"></i> After payment, send screenshot to Telegram or WhatsApp
+            <p class="notice-text">
+                <i class="fas fa-info-circle"></i> Payment screenshot আপলোড করে Confirm করুন। Invoice স্বয়ংক্রিয়ভাবে তৈরি হবে।
             </p>
+
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p>Developed by Abdullha Khan <i class="fas fa-code"></i></p>
-        </div>
-    </footer>
-
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="Assets/js/firebase-config.js"></script>
-    <script src="Assets/js/payment.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="assets/js/firebase-config.js"></script>
+    <script src="assets/js/payment.js"></script>
 </body>
 </html>
