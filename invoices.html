@@ -5,49 +5,625 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoices - PremiumStore Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="cs/admin.css">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-    <div class="admin-layout">
-        <aside class="sidebar">
-            <div class="sidebar-brand">🏪 PremiumStore</div>
-            <nav class="sidebar-nav">
-                <a href="dashboard.html"><i class="fas fa-chart-line"></i> Dashboard</a>
-                <a href="products.html"><i class="fas fa-box"></i> Products</a>
-                <a href="orders.html"><i class="fas fa-shopping-cart"></i> Orders</a>
-                <a href="quick-order.html"><i class="fas fa-bolt"></i> Quick Order</a>
-                <a href="invoices.html" class="active"><i class="fas fa-file-invoice"></i> Invoices</a>
-                <a href="payments.html"><i class="fas fa-credit-card"></i> Payments</a>
-                <a href="media.html"><i class="fas fa-image"></i> Media</a>
-                <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
-            </nav>
-            <div class="sidebar-footer">
-                <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+
+    <!-- ===== MAIN CONTENT (Sidebar ছাড়া) ===== -->
+    <main class="admin-main" style="margin-left:0;padding:20px;">
+
+        <!-- Header -->
+        <header class="admin-header">
+            <h1>📄 Invoices</h1>
+            <div class="theme-toggle" id="themeToggle">🌙</div>
+        </header>
+
+        <!-- Toolbar -->
+        <div class="admin-toolbar">
+            <button class="btn-add" id="createInvoiceBtn">
+                <i class="fas fa-plus"></i> Create Invoice
+            </button>
+            <button class="btn-refresh" id="refreshBtn">
+                <i class="fas fa-sync"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+            <button class="filter-btn-invoice active" data-filter="all" onclick="filterInvoices('all')">All</button>
+            <button class="filter-btn-invoice" data-filter="pending" onclick="filterInvoices('pending')">Pending</button>
+            <button class="filter-btn-invoice" data-filter="delivered" onclick="filterInvoices('delivered')">Delivered</button>
+            <button class="filter-btn-invoice" data-filter="cancelled" onclick="filterInvoices('cancelled')">Cancelled</button>
+        </div>
+
+        <!-- Invoices List -->
+        <div id="invoicesContainer">
+            <div style="text-align:center;padding:40px;color:var(--text-muted);">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading invoices...</p>
             </div>
-        </aside>
+        </div>
 
-        <main class="admin-main">
-            <header class="admin-header">
-                <h1>📄 Invoices</h1>
-                <div class="theme-toggle" id="themeToggle">🌙</div>
-            </header>
+    </main>
 
-            <div class="admin-toolbar">
-                <button class="btn-refresh" id="refreshBtn"><i class="fas fa-sync"></i> Refresh</button>
+    <!-- ===== CREATE INVOICE MODAL ===== -->
+    <div class="modal" id="invoiceModal" style="display:none;">
+        <div class="modal-content" style="max-width:550px;">
+            <div class="modal-header">
+                <h3>Create Custom Invoice</h3>
+                <button class="modal-close" id="invoiceModalClose">&times;</button>
             </div>
-
-            <div id="invoicesContainer">
-                <div style="text-align:center;padding:40px;color:var(--text-muted);">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Loading invoices...</p>
+            <form id="invoiceForm">
+                <div class="form-group">
+                    <label>Product *</label>
+                    <select id="invoiceProduct" required>
+                        <option value="">-- Select Product --</option>
+                    </select>
                 </div>
-            </div>
-        </main>
+
+                <div class="form-group">
+                    <label>Plan *</label>
+                    <select id="invoicePlan" required>
+                        <option value="">-- Select Plan --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>User Info (Username / Link / ID) *</label>
+                    <input type="text" id="invoiceUserInfo" placeholder="e.g., @username or profile link" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Price (USD)</label>
+                    <input type="number" id="invoicePrice" step="0.01" placeholder="Auto from plan">
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="invoiceStatus">
+                        <option value="pending" selected>Pending</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+
+                <div style="display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;">
+                    <button type="submit" class="btn-primary">
+                        <i class="fas fa-file-invoice"></i> Create Invoice
+                    </button>
+                    <button type="button" class="btn-secondary" id="invoiceModalCancel">Cancel</button>
+                </div>
+            </form>
+        </div>
     </div>
 
+    <!-- Copy Toast -->
+    <div class="copy-toast" id="copyToast">✅ Link copied!</div>
+
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
-    <script src="js/invoices.js"></script>
+
+    <!-- Extra Styles -->
+    <style>
+        .filter-btn-invoice {
+            padding: 6px 16px;
+            border-radius: 30px;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .filter-btn-invoice:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+        .filter-btn-invoice.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .invoice-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+        .invoice-card:hover {
+            border-color: var(--accent);
+            box-shadow: var(--shadow-hover);
+        }
+        .invoice-card .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .invoice-card .invoice-id {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.05rem;
+        }
+        .invoice-card .invoice-product {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+        .invoice-card .invoice-user {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+        .invoice-card .invoice-date {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .invoice-card .invoice-price {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+        .invoice-card .status-badge-inv {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .status-badge-inv.pending { background: #fef3c7; color: #92400e; }
+        .status-badge-inv.delivered { background: #dcfce7; color: #166534; }
+        .status-badge-inv.cancelled { background: #fef2f2; color: #dc2626; }
+
+        [data-theme="dark"] .status-badge-inv.pending { background: #92400e; color: #fef3c7; }
+        [data-theme="dark"] .status-badge-inv.delivered { background: #166534; color: #dcfce7; }
+        [data-theme="dark"] .status-badge-inv.cancelled { background: #7f1d1d; color: #fecaca; }
+
+        .invoice-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+        .invoice-actions button,
+        .invoice-actions a {
+            padding: 6px 14px;
+            border-radius: 40px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-view-invoice { background: var(--accent); color: white; }
+        .btn-view-invoice:hover { background: var(--accent-hover); }
+        .btn-copy-inv { background: #8b5cf6; color: white; }
+        .btn-copy-inv:hover { background: #7c3aed; }
+        .btn-delivered { background: #22c55e; color: white; }
+        .btn-delivered:hover { background: #16a34a; }
+        .btn-pending { background: #f59e0b; color: white; }
+        .btn-pending:hover { background: #d97706; }
+        .btn-cancel-inv { background: #dc2626; color: white; }
+        .btn-cancel-inv:hover { background: #b91c1c; }
+        .btn-delete-inv { background: #ef4444; color: white; }
+        .btn-delete-inv:hover { background: #dc2626; }
+
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 10000;
+            box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
+        }
+        .copy-toast.show {
+            display: block;
+            animation: toastSlideUp 0.3s ease;
+        }
+        @keyframes toastSlideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Theme Toggle Position */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        @media (max-width: 600px) {
+            .invoice-actions button,
+            .invoice-actions a {
+                flex: 1;
+                min-width: 100px;
+                justify-content: center;
+            }
+            .admin-main {
+                padding: 12px !important;
+            }
+        }
+    </style>
+
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 Invoice Management loaded');
+
+            const db = firebase.firestore();
+            let allInvoices = [];
+            let currentFilter = 'all';
+
+            // ===== THEME TOGGLE =====
+            const themeToggle = document.getElementById('themeToggle');
+            const savedTheme = localStorage.getItem('adminTheme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+            themeToggle.addEventListener('click', function() {
+                const current = document.documentElement.getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('adminTheme', next);
+                themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+            });
+
+            // ===== LOAD PRODUCTS FOR MODAL =====
+            async function loadProductsForModal() {
+                const select = document.getElementById('invoiceProduct');
+                try {
+                    const snapshot = await db.collection('products').get();
+                    select.innerHTML = '<option value="">-- Select Product --</option>';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const opt = document.createElement('option');
+                        opt.value = doc.id;
+                        opt.textContent = data.name;
+                        select.appendChild(opt);
+                    });
+                } catch (error) {
+                    console.error('Error loading products:', error);
+                }
+            }
+
+            // Load plans when product changes
+            document.getElementById('invoiceProduct').addEventListener('change', async function() {
+                const productId = this.value;
+                const planSelect = document.getElementById('invoicePlan');
+                planSelect.innerHTML = '<option value="">-- Select Plan --</option>';
+                document.getElementById('invoicePrice').value = '';
+
+                if (!productId) return;
+
+                try {
+                    const snapshot = await db.collection('products').doc(productId).collection('items').get();
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const opt = document.createElement('option');
+                        opt.value = doc.id;
+                        opt.textContent = data.name;
+                        opt.dataset.price = data.price || 0;
+                        planSelect.appendChild(opt);
+                    });
+                } catch (error) {
+                    console.error('Error loading plans:', error);
+                }
+            });
+
+            // Auto fill price when plan selected
+            document.getElementById('invoicePlan').addEventListener('change', function() {
+                const selected = this.options[this.selectedIndex];
+                if (selected && selected.dataset.price) {
+                    document.getElementById('invoicePrice').value = selected.dataset.price;
+                }
+            });
+
+            // ===== LOAD INVOICES =====
+            async function loadInvoices() {
+                const container = document.getElementById('invoicesContainer');
+                container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>';
+
+                try {
+                    const snapshot = await db.collection('invoices')
+                        .orderBy('createdAt', 'desc')
+                        .limit(100)
+                        .get();
+
+                    allInvoices = [];
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        data.docId = doc.id;
+                        allInvoices.push(data);
+                    });
+
+                    displayInvoices();
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    container.innerHTML = `<p style="color:var(--danger);text-align:center;padding:40px;">Error: ${error.message}</p>`;
+                }
+            }
+
+            function displayInvoices() {
+                const container = document.getElementById('invoicesContainer');
+                const filtered = currentFilter === 'all' ? allInvoices :
+                                allInvoices.filter(inv => inv.status === currentFilter);
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center;padding:60px;color:var(--text-muted);">
+                            <i class="fas fa-file-invoice" style="font-size:3rem;display:block;margin-bottom:12px;color:var(--border-color);"></i>
+                            <p>No invoices found</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                filtered.forEach(inv => {
+                    const date = inv.createdAt?.toDate?.() || new Date();
+                    const status = inv.status || 'pending';
+                    const price = inv.price || 0;
+                    const orderId = inv.orderId || 'N/A';
+
+                    html += `
+                        <div class="invoice-card" data-id="${inv.docId}">
+                            <div class="invoice-header">
+                                <div>
+                                    <div class="invoice-id">INV-${orderId}</div>
+                                    <div class="invoice-product">${inv.productName || 'Product'} - ${inv.plan || 'Standard'}</div>
+                                    <div class="invoice-user">👤 ${inv.userInfo || 'No info'}</div>
+                                    <div class="invoice-date">🕐 ${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div class="invoice-price">$${price.toFixed(2)}</div>
+                                    <span class="status-badge-inv ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                                </div>
+                            </div>
+                            <div class="invoice-actions">
+                                <a class="btn-view-invoice" href="../invoice.html?orderId=${orderId}" target="_blank">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                                <button class="btn-copy-inv" onclick="copyInvoiceLink('${orderId}')">
+                                    <i class="fas fa-link"></i> Copy Link
+                                </button>
+                                ${status !== 'delivered' ? `
+                                    <button class="btn-delivered" onclick="updateStatus('${inv.docId}', 'delivered')">
+                                        <i class="fas fa-check-circle"></i> Delivered
+                                    </button>
+                                ` : ''}
+                                ${status !== 'pending' ? `
+                                    <button class="btn-pending" onclick="updateStatus('${inv.docId}', 'pending')">
+                                        <i class="fas fa-clock"></i> Pending
+                                    </button>
+                                ` : ''}
+                                ${status !== 'cancelled' ? `
+                                    <button class="btn-cancel-inv" onclick="updateStatus('${inv.docId}', 'cancelled')">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                ` : ''}
+                                <button class="btn-delete-inv" onclick="deleteInvoice('${inv.docId}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            // ===== FILTER =====
+            window.filterInvoices = function(filter) {
+                currentFilter = filter;
+                document.querySelectorAll('.filter-btn-invoice').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.filter === filter);
+                });
+                displayInvoices();
+            };
+
+            // ===== COPY INVOICE LINK =====
+            window.copyInvoiceLink = function(orderId) {
+                const baseUrl = window.location.origin + window.location.pathname.replace('admin/invoices.html', 'invoice.html');
+                const link = baseUrl + '?orderId=' + orderId;
+
+                const fallback = () => {
+                    const temp = document.createElement('textarea');
+                    temp.value = link;
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(temp);
+                    showCopyToast();
+                };
+
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(link).then(showCopyToast).catch(fallback);
+                } else {
+                    fallback();
+                }
+            };
+
+            function showCopyToast() {
+                const toast = document.getElementById('copyToast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+
+            // ===== UPDATE STATUS =====
+            window.uPDATE STATUS =====
+            window.updateStatus = async function(docId, newStatus) {
+                try {
+                    await db.collection('invoices').doc(docId).update({
+                        status: newStatus,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    const inv = allInvoices.find(i => i.docId === docId);
+                    if (inv && inv.orderDocId) {
+                        await db.collection('orders').doc(inv.orderDocId).update({
+                            status: newStatus,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        }).catch(() => {});
+                    }
+
+                    alert('✅ Status updated to ' + newStatus);
+                    loadInvoices();
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
+            };
+
+            // ===== DELETE INVOICE =====
+            window.deleteInvoice = async function(docId) {
+                if (!confirm('Delete this invoice?')) return;
+
+                try {
+                    await db.collection('invoices').doc(docId).delete();
+                    alert('✅ Invoice deleted');
+                    loadInvoices();
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
+            };
+
+            // ===== CREATE INVOICE MODAL =====
+            const invoiceModal = document.getElementById('invoiceModal');
+            const createBtn = document.getElementById('createInvoiceBtn');
+            const modalClose = document.getElementById('invoiceModalClose');
+            const modalCancel = document.getElementById('invoiceModalCancel');
+            const invoiceForm = document.getElementById('invoiceForm');
+
+            createBtn.addEventListener('click', async function() {
+                invoiceForm.reset();
+                document.getElementById('invoicePlan').innerHTML = '<option value="">-- Select Plan --</option>';
+                await loadProductsForModal();
+                invoiceModal.style.display = 'flex';
+            });
+
+            modalClose.addEventListener('click', () => invoiceModal.style.display = 'none');
+            modalCancel.addEventListener('click', () => invoiceModal.style.display = 'none');
+            invoiceModal.addEventListener('click', function(e) {
+                if (e.target === this) this.style.display = 'none';
+            });
+
+            // ===== SUBMIT NEW INVOICE =====
+            invoiceForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const productId = document.getElementById('invoiceProduct').value;
+                const planId = document.getElementById('invoicePlan').value;
+                const userInfo = document.getElementById('invoiceUserInfo').value.trim();
+                const price = parseFloat(document.getElementById('invoicePrice').value);
+                const status = document.getElementById('invoiceStatus').value;
+
+                if (!productId || !planId || !userInfo || isNaN(price)) {
+                    alert('❌ Please fill all fields');
+                    return;
+                }
+
+                try {
+                    const productDoc = await db.collection('products').doc(productId).get();
+                    const productName = productDoc.exists ? productDoc.data().name : 'Product';
+
+                    const planDoc = await db.collection('products').doc(productId).collection('items').doc(planId).get();
+                    const planName = planDoc.exists ? planDoc.data().name : 'Standard';
+
+                    const counterDoc = await db.collection('settings').doc('orderCounter').get();
+                    let counter = 1;
+                    if (counterDoc.exists) {
+                        counter = (counterDoc.data().counter || 0) + 1;
+                    }
+                    await db.collection('settings').doc('orderCounter').set({ counter }, { merge: true });
+
+                    const nairaPrice = price * 1440;
+
+                    const orderData = {
+                        orderId: counter,
+                        productId: productId,
+                        productName: productName,
+                        planId: planId,
+                        plan: planName,
+                        userInfo: userInfo,
+                        userFieldLabel: 'User Info',
+                        price: price,
+                        nairaPrice: nairaPrice,
+                        currency: 'crypto',
+                        paymentMethod: 'Admin Created',
+                        status: status,
+                        invoiceCreated: true,
+                        createdBy: 'admin',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    const orderRef = await db.collection('orders').add(orderData);
+
+                    const invoiceData = {
+                        invoiceId: 'INV-' + counter,
+                        orderId: counter,
+                        orderDocId: orderRef.id,
+                        productName: productName,
+                        plan: planName,
+                        userInfo: userInfo,
+                        userFieldLabel: 'User Info',
+                        price: price,
+                        nairaPrice: nairaPrice,
+                        currency: 'crypto',
+                        paymentMethod: 'Admin Created',
+                        status: status,
+                        createdBy: 'admin',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+
+                    await db.collection('invoices').add(invoiceData);
+
+                    const baseUrl = window.location.origin + window.location.pathname.replace('admin/invoices.html', 'invoice.html');
+                    const link = baseUrl + '?orderId=' + counter;
+
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(link).catch(() => {});
+                    }
+
+                    alert('✅ Invoice Created!\n\nOrder ID: #' + counter + '\n\nLink copied:\n' + link);
+
+                    invoiceModal.style.display = 'none';
+                    loadInvoices();
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Error: ' + error.message);
+                }
+            });
+
+            // ===== REFRESH =====
+            document.getElementById('refreshBtn').addEventListener('click', loadInvoices);
+
+            // ===== INIT =====
+            loadInvoices();
+        });
+    </script>
+
 </body>
 </html>
