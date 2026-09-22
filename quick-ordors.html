@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Quick Order - PremiumStore</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="cs/admin.css">
+    <link rel="stylesheet" href="css/admin.css">
     <style>
         /* ============================================================
            QUICK ORDER EXTRA STYLES
@@ -91,13 +91,8 @@
             margin-top: 2px;
         }
 
-        .stat-box.today .stat-number {
-            color: #22c55e;
-        }
-
-        .stat-box.total .stat-number {
-            color: #eab308;
-        }
+        .stat-box.today .stat-number { color: #22c55e; }
+        .stat-box.total .stat-number { color: #eab308; }
 
         .plan-selector {
             display: grid;
@@ -116,9 +111,7 @@
             transition: all 0.3s ease;
         }
 
-        .plan-option:active {
-            transform: scale(0.96);
-        }
+        .plan-option:active { transform: scale(0.96); }
 
         .plan-option.active {
             border-color: #1DA1F2;
@@ -149,9 +142,7 @@
             margin-top: 4px;
         }
 
-        .form-group {
-            margin-bottom: 14px;
-        }
+        .form-group { margin-bottom: 14px; }
 
         .form-group label {
             display: block;
@@ -184,9 +175,7 @@
             outline: none;
         }
 
-        .form-group input::placeholder {
-            color: #666;
-        }
+        .form-group input::placeholder { color: #666; }
 
         .form-row {
             display: grid;
@@ -213,20 +202,9 @@
             margin-top: 8px;
         }
 
-        .btn-submit:hover {
-            background: #1a8cd8;
-            transform: scale(1.02);
-        }
-
-        .btn-submit:active {
-            transform: scale(0.97);
-        }
-
-        .btn-submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .btn-submit:hover { background: #1a8cd8; transform: scale(1.02); }
+        .btn-submit:active { transform: scale(0.97); }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         .success-msg {
             display: none;
@@ -250,6 +228,111 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* ============================================================
+           NEW: INVOICE LINK BOX
+           ============================================================ */
+        .invoice-link-box {
+            display: none;
+            background: #1a2a3a;
+            border: 2px solid #1DA1F2;
+            border-radius: 14px;
+            padding: 14px;
+            margin-top: 14px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .invoice-link-box.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .invoice-link-box .link-label {
+            color: #1DA1F2;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .invoice-link-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .invoice-link-input {
+            flex: 1;
+            padding: 12px 14px;
+            background: #0f0f0f;
+            border: 2px solid #333;
+            border-radius: 12px;
+            color: #1DA1F2;
+            font-size: 0.8rem;
+            font-family: 'Courier New', monospace;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .invoice-link-input:focus {
+            border-color: #1DA1F2;
+            outline: none;
+        }
+
+        .btn-copy-link {
+            padding: 12px 20px;
+            background: #1DA1F2;
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-copy-link:hover { background: #1a8cd8; transform: scale(1.03); }
+        .btn-copy-link.copied { background: #22c55e; color: white; }
+
+        /* ============================================================
+           NEW: VIEW INVOICES BUTTON
+           ============================================================ */
+        .btn-view-invoices {
+            width: 100%;
+            padding: 12px;
+            background: transparent;
+            color: #1DA1F2;
+            border: 2px solid #1DA1F2;
+            border-radius: 60px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            text-decoration: none;
+        }
+
+        .btn-view-invoices:hover {
+            background: #1DA1F2;
+            color: #000;
+            transform: scale(1.02);
+        }
+
+        /* ===== ORDERS LIST ===== */
         .orders-list {
             margin-top: 20px;
             border-top: 1px solid #333;
@@ -258,19 +341,9 @@
             overflow-y: auto;
         }
 
-        .orders-list::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .orders-list::-webkit-scrollbar-track {
-            background: #1a1a1a;
-            border-radius: 10px;
-        }
-
-        .orders-list::-webkit-scrollbar-thumb {
-            background: #1DA1F2;
-            border-radius: 10px;
-        }
+        .orders-list::-webkit-scrollbar { width: 4px; }
+        .orders-list::-webkit-scrollbar-track { background: #1a1a1a; border-radius: 10px; }
+        .orders-list::-webkit-scrollbar-thumb { background: #1DA1F2; border-radius: 10px; }
 
         .orders-list h3 {
             color: #ffffff;
@@ -281,10 +354,7 @@
             justify-content: space-between;
         }
 
-        .orders-list h3 span {
-            color: #888;
-            font-size: 0.75rem;
-        }
+        .orders-list h3 span { color: #888; font-size: 0.75rem; }
 
         .order-item {
             background: #1a1a1a;
@@ -297,36 +367,21 @@
             align-items: center;
         }
 
-        .order-item:hover {
-            border-color: #1DA1F2;
-        }
+        .order-item:hover { border-color: #1DA1F2; }
 
-        .order-item .order-info {
-            flex: 1;
-            min-width: 0;
-        }
-
+        .order-item .order-info { flex: 1; min-width: 0; }
         .order-item .order-info .order-id {
             font-weight: 700;
             color: #1DA1F2;
             font-size: 0.85rem;
         }
-
-        .order-item .order-info .order-plan {
-            color: #ffffff;
-            font-size: 0.8rem;
-        }
-
+        .order-item .order-info .order-plan { color: #ffffff; font-size: 0.8rem; }
         .order-item .order-info .order-user {
             color: #888;
             font-size: 0.75rem;
             word-break: break-all;
         }
-
-        .order-item .order-info .order-date {
-            color: #555;
-            font-size: 0.65rem;
-        }
+        .order-item .order-info .order-date { color: #555; font-size: 0.65rem; }
 
         .order-item .order-right {
             display: flex;
@@ -342,21 +397,9 @@
             font-weight: 600;
             display: inline-block;
         }
-
-        .order-item .order-status.completed {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .order-item .order-status.pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .order-item .order-status.cancelled {
-            background: #fef2f2;
-            color: #dc2626;
-        }
+        .order-item .order-status.completed { background: #dcfce7; color: #166534; }
+        .order-item .order-status.pending { background: #fef3c7; color: #92400e; }
+        .order-item .order-status.cancelled { background: #fef2f2; color: #dc2626; }
 
         .order-item .order-actions button {
             background: none;
@@ -381,19 +424,35 @@
             font-size: 0.85rem;
         }
 
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #22c55e;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            z-index: 10000;
+            box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
         @media (max-width: 400px) {
-            .quick-container {
-                padding: 18px 14px;
-            }
-            .quick-header h1 {
-                font-size: 1.2rem;
-            }
-            .stats-row {
-                gap: 6px;
-            }
-            .stat-box .stat-number {
-                font-size: 1.2rem;
-            }
+            .quick-container { padding: 18px 14px; }
+            .quick-header h1 { font-size: 1.2rem; }
+            .stats-row { gap: 6px; }
+            .stat-box .stat-number { font-size: 1.2rem; }
+            .invoice-link-row { flex-direction: column; }
+            .btn-copy-link { justify-content: center; }
         }
     </style>
 </head>
@@ -478,6 +537,24 @@
                 <i class="fas fa-check-circle"></i> Order added successfully!
             </div>
 
+            <!-- ===== NEW: INVOICE LINK BOX ===== -->
+            <div class="invoice-link-box" id="invoiceLinkBox">
+                <div class="link-label">
+                    <i class="fas fa-link"></i> Invoice Link (Auto Generated):
+                </div>
+                <div class="invoice-link-row">
+                    <input type="text" class="invoice-link-input" id="invoiceLinkInput" readonly>
+                    <button type="button" class="btn-copy-link" id="copyInvoiceLinkBtn">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== NEW: VIEW INVOICES BUTTON ===== -->
+            <a href="invoices.html" class="btn-view-invoices">
+                <i class="fas fa-file-invoice"></i> View All Invoices
+            </a>
+
         </form>
 
         <!-- ===== RECENT ORDERS ===== -->
@@ -492,6 +569,9 @@
         </div>
 
     </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toastMsg"></div>
 
     <!-- ============================================================
     JAVASCRIPT
