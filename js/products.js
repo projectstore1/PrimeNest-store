@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function() {
-    const user = firebase.auth().currentUser;
-    if (!user) return;
+    console.log('📦 Products page loaded');
 
     // ============================================================
     // ===== LOAD PRODUCTS =====
@@ -62,6 +61,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         } catch (error) {
             container.innerHTML = `<p style="color:var(--danger);">Error: ${error.message}</p>`;
+            console.error('Error:', error);
         }
     }
 
@@ -142,7 +142,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         const price = parseFloat(document.getElementById('itemPriceInput').value);
         if (!name || isNaN(price)) { alert('Enter name and price'); return; }
 
-        await db.collection('products').doc(productId).collection('items').add({ name, price, icon: 'fas fa-box' });
+        await db.collection('products').doc(productId).collection('items').add({ 
+            name, 
+            price, 
+            icon: 'fas fa-box' 
+        });
+        
         document.getElementById('itemNameInput').value = '';
         document.getElementById('itemPriceInput').value = '';
         loadItems(productId);
@@ -167,26 +172,43 @@ document.addEventListener('DOMContentLoaded', async function() {
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
 
-        if (editId) {
-            await db.collection('products').doc(editId).update(data);
-            alert('✅ Product updated!');
-        } else {
-            const doc = await db.collection('products').add({ ...data, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-            document.getElementById('editProductId').value = doc.id;
-            alert('✅ Product added! Now add items.');
+        try {
+            if (editId) {
+                await db.collection('products').doc(editId).update(data);
+                alert('✅ Product updated!');
+            } else {
+                const doc = await db.collection('products').add({ 
+                    ...data, 
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+                });
+                document.getElementById('editProductId').value = doc.id;
+                alert('✅ Product added! Now add items.');
+            }
+            loadProducts();
+            document.getElementById('productModal').style.display = 'none';
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Error: ' + error.message);
         }
-        loadProducts();
-        document.getElementById('productModal').style.display = 'none';
     });
 
+    // ============================================================
+    // ===== BUTTONS =====
+    // ============================================================
     document.getElementById('addProductBtn').addEventListener('click', () => openProductModal(null));
     document.getElementById('refreshBtn').addEventListener('click', loadProducts);
+    
     document.getElementById('modalClose').addEventListener('click', () => {
         document.getElementById('productModal').style.display = 'none';
     });
+    
     document.getElementById('modalCancel').addEventListener('click', () => {
         document.getElementById('productModal').style.display = 'none';
     });
 
+    // ============================================================
+    // ===== INIT =====
+    // ============================================================
     loadProducts();
+    console.log('✅ Products page ready!');
 });
