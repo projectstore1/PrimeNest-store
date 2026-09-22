@@ -5,21 +5,166 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice - PremiumStore</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="Assets/css/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <!-- THEME TOGGLE -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <img src="https://via.placeholder.com/40x40?text=PS" alt="PremiumStore">
+                <span>PremiumStore</span>
+            </div>
+            <nav class="nav">
+                <a href="index.html"><i class="fas fa-home"></i> Home</a>
+                <a href="order-history.html"><i class="fas fa-history"></i> Orders</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="container" style="padding-top:20px;padding-bottom:40px;">
+        <div class="invoice-wrapper">
+
+            <!-- Action Buttons -->
+            <div class="action-bar">
+                <button class="btn-print" onclick="printInvoice()">
+                    <i class="fas fa-print"></i> Print
+                </button>
+                <button class="btn-pdf" onclick="downloadPDF()">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
+                <button class="btn-copy-link" onclick="copyInvoiceLink()">
+                    <i class="fas fa-link"></i> Copy Link
+                </button>
+                <a class="btn-support" href="https://t.me/abdullha2" target="_blank">
+                    <i class="fab fa-telegram"></i> Support
+                </a>
+                <a class="btn-home" href="index.html">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+
+            <!-- ===== INVOICE ===== -->
+            <div class="invoice" id="invoiceContent">
+
+                <!-- Header -->
+                <div class="invoice-header">
+                    <div class="logo-side">
+                        <img src="https://via.placeholder.com/50x50?text=PS" alt="PremiumStore Logo">
+                        <div>
+                            <h1>PremiumStore</h1>
+                            <p>Premium Digital Products</p>
+                        </div>
+                    </div>
+                    <div class="invoice-meta">
+                        <h2>INVOICE</h2>
+                        <p>#<span id="invoiceId">Loading...</span></p>
+                        <p id="invoiceDate">--</p>
+                        <span class="status-badge" id="invoiceStatus">Pending</span>
+                    </div>
+                </div>
+
+                <!-- Customer + Order Info -->
+                <div class="invoice-body">
+                    <div class="info-section">
+                        <h3>Customer Information</h3>
+                        <p id="customerInfo">Loading...</p>
+                    </div>
+                    <div class="info-section">
+                        <h3>Order Information</h3>
+                        <p><strong>Order ID:</strong> #<span id="orderId">--</span></p>
+                        <p><strong>Payment:</strong> <span id="paymentMethod">--</span></p>
+                        <p><strong>Currency:</strong> <span id="currencyType">--</span></p>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Plan</th>
+                            <th style="text-align:right;">Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="item-name" id="itemProductName">--</td>
+                            <td id="itemPlanName">--</td>
+                            <td class="item-price">$<span id="itemPrice">0.00</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- Total Box -->
+                <div class="total-box">
+                    <div class="total-row">
+                        <span>Subtotal</span>
+                        <span>$<span id="subTotal">0.00</span></span>
+                    </div>
+                    <div class="total-row">
+                        <span>Naira Equivalent</span>
+                        <span>₦<span id="nairaTotal">0</span></span>
+                    </div>
+                    <div class="total-row grand-total">
+                        <span>Total</span>
+                        <span>$<span id="grandTotal">0.00</span></span>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="invoice-footer">
+                    <div class="support-links">
+                        <a href="https://t.me/abdullha2" target="_blank"><i class="fab fa-telegram"></i> Telegram</a>
+                        <a href="https://wa.me/message/NSIUKXADRUXJA1" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                        <a href="index.html"><i class="fas fa-globe"></i> PremiumStore</a>
+                    </div>
+                    <p class="thank-you">Thank you for your purchase! 💙</p>
+                    <p class="credit">Developed by Abdullha Khan</p>
+                </div>
+
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" style="text-align:center;padding:60px 20px;">
+                <i class="fas fa-spinner fa-spin" style="font-size:3rem;color:#2563eb;"></i>
+                <p style="margin-top:16px;color:#6b7a9a;">Loading Invoice...</p>
+            </div>
+
+            <!-- Not Found State -->
+            <div id="notFoundState" style="display:none;text-align:center;padding:60px 20px;">
+                <i class="fas fa-exclamation-circle" style="font-size:4rem;color:#dc2626;"></i>
+                <h2 style="color:#0b1a3a;margin-top:16px;">Invoice Not Found</h2>
+                <p style="color:#6b7a9a;margin-top:8px;">এই Invoice টি পাওয়া যায়নি। সঠিক Link ব্যবহার করুন।</p>
+                <a href="index.html" class="btn-home" style="display:inline-flex;margin-top:20px;padding:12px 24px;background:#2563eb;color:white;border-radius:40px;text-decoration:none;font-weight:700;">
+                    <i class="fas fa-home"></i> Go Home
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>Developed by Abdullha Khan <i class="fas fa-code"></i></p>
+        </div>
+    </footer>
+
+    <!-- CSS (Invoice Specific) -->
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        /* ===== INVOICE STYLES ===== */
+        .invoice-wrapper { max-width: 800px; margin: 0 auto; }
 
-        body {
-            background: #f0f4fe;
-            padding: 20px;
-            min-height: 100vh;
-        }
-
-        .invoice-wrapper {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
+        /* Action Bar */
         .action-bar {
             display: flex;
             gap: 10px;
@@ -27,7 +172,6 @@
             flex-wrap: wrap;
             justify-content: center;
         }
-
         .action-bar button, .action-bar a {
             padding: 12px 24px;
             border-radius: 40px;
@@ -41,17 +185,18 @@
             gap: 8px;
             transition: all 0.2s;
         }
-
         .btn-print { background: #2563eb; color: white; }
-        .btn-print:hover { background: #1d4ed8; }
+        .btn-print:hover { background: #1d4ed8; transform: scale(1.03); }
         .btn-pdf { background: #dc2626; color: white; }
-        .btn-pdf:hover { background: #b91c1c; }
+        .btn-pdf:hover { background: #b91c1c; transform: scale(1.03); }
+        .btn-copy-link { background: #8b5cf6; color: white; }
+        .btn-copy-link:hover { background: #7c3aed; transform: scale(1.03); }
         .btn-support { background: #0088cc; color: white; }
-        .btn-support:hover { background: #006699; }
+        .btn-support:hover { background: #006699; transform: scale(1.03); }
         .btn-home { background: #22c55e; color: white; }
-        .btn-home:hover { background: #16a34a; }
+        .btn-home:hover { background: #16a34a; transform: scale(1.03); }
 
-        /* ===== INVOICE ===== */
+        /* Invoice Box */
         .invoice {
             background: white;
             border-radius: 16px;
@@ -60,6 +205,7 @@
             position: relative;
         }
 
+        /* Header */
         .invoice-header {
             display: flex;
             justify-content: space-between;
@@ -70,49 +216,39 @@
             flex-wrap: wrap;
             gap: 12px;
         }
-
         .invoice-header .logo-side {
             display: flex;
             align-items: center;
             gap: 12px;
         }
-
         .invoice-header .logo-side img {
             width: 50px;
             height: 50px;
             border-radius: 12px;
             object-fit: cover;
         }
-
         .invoice-header .logo-side h1 {
             color: #0b1a3a;
             font-size: 1.5rem;
             font-weight: 800;
         }
-
         .invoice-header .logo-side p {
             color: #6b7a9a;
             font-size: 0.8rem;
         }
-
-        .invoice-header .invoice-meta {
-            text-align: right;
-        }
-
+        .invoice-header .invoice-meta { text-align: right; }
         .invoice-header .invoice-meta h2 {
             color: #2563eb;
             font-size: 1.8rem;
             font-weight: 800;
             letter-spacing: 1px;
         }
-
         .invoice-header .invoice-meta p {
             color: #6b7a9a;
             font-size: 0.8rem;
             margin-top: 2px;
         }
-
-        .invoice-header .invoice-meta .status-badge {
+        .status-badge {
             display: inline-block;
             padding: 4px 14px;
             border-radius: 30px;
@@ -120,18 +256,17 @@
             font-weight: 700;
             margin-top: 6px;
         }
-
         .status-pending { background: #fef3c7; color: #92400e; }
         .status-completed { background: #dcfce7; color: #166534; }
         .status-cancelled { background: #fef2f2; color: #dc2626; }
 
+        /* Body */
         .invoice-body {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 24px;
             margin-bottom: 24px;
         }
-
         .info-section h3 {
             color: #0b1a3a;
             font-size: 0.85rem;
@@ -141,28 +276,21 @@
             padding-bottom: 6px;
             border-bottom: 1px solid #eef2f9;
         }
-
         .info-section p {
             color: #4a5a7a;
             font-size: 0.9rem;
             margin-bottom: 4px;
+            word-break: break-all;
         }
+        .info-section p strong { color: #0b1a3a; }
 
-        .info-section p strong {
-            color: #0b1a3a;
-        }
-
-        /* ===== ITEMS TABLE ===== */
+        /* Items Table */
         .items-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 24px;
         }
-
-        .items-table thead {
-            background: #f5f7fc;
-        }
-
+        .items-table thead { background: #f5f7fc; }
         .items-table th {
             padding: 12px 14px;
             text-align: left;
@@ -171,32 +299,26 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .items-table td {
             padding: 14px;
             border-bottom: 1px solid #eef2f9;
             color: #0b1a3a;
             font-size: 0.9rem;
         }
-
-        .items-table .item-name {
-            font-weight: 700;
-        }
-
+        .items-table .item-name { font-weight: 700; }
         .items-table .item-price {
             text-align: right;
             font-weight: 700;
             color: #2563eb;
         }
 
-        /* ===== TOTAL BOX ===== */
+        /* Total Box */
         .total-box {
             background: #f5f7fc;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 24px;
         }
-
         .total-box .total-row {
             display: flex;
             justify-content: space-between;
@@ -204,7 +326,6 @@
             color: #4a5a7a;
             font-size: 0.9rem;
         }
-
         .total-box .total-row.grand-total {
             border-top: 2px solid #2563eb;
             margin-top: 8px;
@@ -213,37 +334,14 @@
             font-size: 1.1rem;
             font-weight: 800;
         }
+        .total-box .total-row.grand-total span:last-child { color: #2563eb; }
 
-        .total-box .total-row.grand-total span:last-child {
-            color: #2563eb;
-        }
-
-        /* ===== SCREENSHOT ===== */
-        .screenshot-section {
-            margin-bottom: 24px;
-        }
-
-        .screenshot-section h3 {
-            color: #0b1a3a;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-
-        .screenshot-section img {
-            max-width: 200px;
-            border-radius: 12px;
-            border: 2px solid #eef2f9;
-        }
-
-        /* ===== FOOTER ===== */
+        /* Footer */
         .invoice-footer {
             border-top: 2px solid #eef2f9;
             padding-top: 20px;
             text-align: center;
         }
-
         .invoice-footer .support-links {
             display: flex;
             justify-content: center;
@@ -251,7 +349,6 @@
             flex-wrap: wrap;
             margin-bottom: 12px;
         }
-
         .invoice-footer .support-links a {
             color: #2563eb;
             text-decoration: none;
@@ -261,140 +358,69 @@
             align-items: center;
             gap: 6px;
         }
-
         .invoice-footer .thank-you {
             color: #6b7a9a;
             font-size: 0.85rem;
             margin-bottom: 6px;
         }
-
         .invoice-footer .credit {
             color: #6b7a9a;
             font-size: 0.75rem;
         }
 
+        /* Responsive */
         @media (max-width: 600px) {
             .invoice { padding: 24px 20px; }
             .invoice-body { grid-template-columns: 1fr; gap: 16px; }
             .invoice-header .invoice-meta { text-align: left; }
-            .action-bar button, .action-bar a { padding: 10px 16px; font-size: 0.8rem; }
+            .action-bar button, .action-bar a {
+                padding: 10px 16px;
+                font-size: 0.8rem;
+            }
         }
 
-        /* Print styles */
+        /* Print Styles */
         @media print {
             body { background: white; padding: 0; }
-            .action-bar { display: none; }
-            .invoice { box-shadow: none; border-radius: 0; }
+            .action-bar, .header, .footer, .theme-toggle { display: none !important; }
+            .invoice { box-shadow: none; border-radius: 0; padding: 20px; }
+        }
+
+        /* Copy Toast */
+        .copy-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #22c55e;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 8px 30px rgba(34, 197, 94, 0.4);
+        }
+        .copy-toast.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
     </style>
-</head>
-<body>
 
-    <div class="invoice-wrapper">
-
-        <!-- ===== ACTION BUTTONS ===== -->
-        <div class="action-bar">
-            <button class="btn-print" onclick="printInvoice()"><i class="fas fa-print"></i> Print</button>
-            <button class="btn-pdf" onclick="downloadPDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
-            <a class="btn-support" href="https://t.me/abdullha2" target="_blank"><i class="fab fa-telegram"></i> Support</a>
-            <a class="btn-home" href="index.html"><i class="fas fa-home"></i> Home</a>
-        </div>
-
-        <!-- ===== INVOICE ===== -->
-        <div class="invoice" id="invoiceContent">
-
-            <!-- Header -->
-            <div class="invoice-header">
-                <div class="logo-side">
-                    <img src="https://via.placeholder.com/50x50?text=PS" alt="PremiumStore Logo" id="invoiceLogo">
-                    <div>
-                        <h1>PremiumStore</h1>
-                        <p>Premium Digital Products</p>
-                    </div>
-                </div>
-                <div class="invoice-meta">
-                    <h2>INVOICE</h2>
-                    <p>#<span id="invoiceId">INV-0000</span></p>
-                    <p id="invoiceDate">--</p>
-                    <span class="status-badge status-pending" id="invoiceStatus">Pending</span>
-                </div>
-            </div>
-
-            <!-- Body -->
-            <div class="invoice-body">
-                <div class="info-section">
-                    <h3>Customer Info</h3>
-                    <p><strong id="customerFieldLabel">Information:</strong></p>
-                    <p id="customerInfo">--</p>
-                </div>
-                <div class="info-section">
-                    <h3>Order Info</h3>
-                    <p><strong>Order ID:</strong> #<span id="orderId">--</span></p>
-                    <p><strong>Payment:</strong> <span id="paymentMethod">--</span></p>
-                </div>
-            </div>
-
-            <!-- Items Table -->
-            <table class="items-table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Plan</th>
-                        <th style="text-align:right;">Price</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="item-name" id="itemProductName">--</td>
-                        <td id="itemPlanName">--</td>
-                        <td class="item-price">$<span id="itemPrice">0.00</span></td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <!-- Total -->
-            <div class="total-box">
-                <div class="total-row">
-                    <span>Subtotal</span>
-                    <span>$<span id="subTotal">0.00</span></span>
-                </div>
-                <div class="total-row">
-                    <span>Naira Equivalent</span>
-                    <span>₦<span id="nairaTotal">0</span></span>
-                </div>
-                <div class="total-row grand-total">
-                    <span>Total</span>
-                    <span>$<span id="grandTotal">0.00</span></span>
-                </div>
-            </div>
-
-            <!-- Screenshot -->
-            <div class="screenshot-section" id="screenshotSection">
-                <h3>Payment Screenshot</h3>
-                <img id="invoiceScreenshot" src="" alt="Payment Screenshot">
-            </div>
-
-            <!-- Footer -->
-            <div class="invoice-footer">
-                <div class="support-links">
-                    <a href="https://t.me/abdullha2" target="_blank"><i class="fab fa-telegram"></i> Telegram</a>
-                    <a href="https://wa.me/message/NSIUKXADRUXJA1" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp</a>
-                    <a href="index.html"><i class="fas fa-globe"></i> PremiumStore</a>
-                </div>
-                <p class="thank-you">Thank you for your purchase! 💙</p>
-                <p class="credit">Developed by Abdullha Khan</p>
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- ============================================================
-    JAVASCRIPT
-    ============================================================ -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="Assets/js/firebase-config.js"></script>
 
+    <!-- Copy Toast -->
+    <div class="copy-toast" id="copyToast">✅ Link copied!</div>
+
+    <!-- JAVASCRIPT -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('📄 Invoice page loaded');
@@ -402,82 +428,166 @@
             const db = firebase.firestore();
 
             // ============================================================
-            // ===== LOAD INVOICE DATA =====
+            // ===== GET ORDER ID FROM URL =====
             // ============================================================
             const urlParams = new URLSearchParams(window.location.search);
             const orderId = urlParams.get('orderId');
 
+            console.log('🆔 URL Order ID:', orderId);
+
+            // ============================================================
+            // ===== LOAD INVOICE =====
+            // ============================================================
             async function loadInvoice() {
+                const loadingEl = document.getElementById('loadingState');
+                const notFoundEl = document.getElementById('notFoundState');
+                const invoiceEl = document.getElementById('invoiceContent');
+
+                // Hide invoice initially
+                invoiceEl.style.display = 'none';
+                loadingEl.style.display = 'block';
+                notFoundEl.style.display = 'none';
+
+                if (!orderId) {
+                    console.log('❌ No Order ID in URL');
+                    loadingEl.style.display = 'none';
+                    notFoundEl.style.display = 'block';
+                    return;
+                }
+
                 try {
+                    // ===== TRY FIRESTORE FIRST =====
                     let invoiceData = null;
 
-                    // First try from localStorage
-                    const cached = localStorage.getItem('lastInvoice');
-                    if (cached) {
-                        try { invoiceData = JSON.parse(cached); } catch (e) {}
-                    }
+                    // Search by orderId field
+                    const snapshot = await db.collection('invoices')
+                        .where('orderId', '==', parseInt(orderId))
+                        .limit(1)
+                        .get();
 
-                    // If we have orderId, fetch from Firebase
-                    if (orderId) {
-                        const snapshot = await db.collection('invoices')
+                    if (!snapshot.empty) {
+                        invoiceData = snapshot.docs[0].data();
+                        console.log('✅ Found in Firestore:', invoiceData);
+                    } else {
+                        // Try searching orders collection
+                        const orderSnap = await db.collection('orders')
                             .where('orderId', '==', parseInt(orderId))
                             .limit(1)
                             .get();
 
-                        if (!snapshot.empty) {
-                            invoiceData = snapshot.docs[0].data();
+                        if (!orderSnap.empty) {
+                            invoiceData = orderSnap.docs[0].data();
+                            console.log('✅ Found in Orders:', invoiceData);
                         }
                     }
 
                     if (!invoiceData) {
-                        document.getElementById('invoiceId').textContent = 'NOT FOUND';
+                        console.log('❌ Invoice not found');
+                        loadingEl.style.display = 'none';
+                        notFoundEl.style.display = 'block';
                         return;
                     }
 
-                    // Fill in data
-                    const date = invoiceData.createdAt?.toDate?.() || new Date();
-                    const orderIdNum = invoiceData.orderId || '0000';
-                    const price = invoiceData.price || 0;
-                    const naira = invoiceData.nairaPrice || (price * 1440);
-                    const status = invoiceData.status || 'pending';
+                    // ===== DISPLAY INVOICE =====
+                    displayInvoice(invoiceData);
 
-                    document.getElementById('invoiceId').textContent = 'INV-' + orderIdNum;
-                    document.getElementById('invoiceDate').textContent = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-                    
-                    const statusEl = document.getElementById('invoiceStatus');
-                    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-                    statusEl.className = 'status-badge status-' + status;
-
-                    document.getElementById('customerFieldLabel').textContent = (invoiceData.userFieldLabel || 'Information') + ':';
-                    document.getElementById('customerInfo').textContent = invoiceData.userInfo || '--';
-                    document.getElementById('orderId').textContent = orderIdNum;
-                    document.getElementById('paymentMethod').textContent = invoiceData.paymentMethod || invoiceData.currency || 'Crypto';
-                    
-                    document.getElementById('itemProductName').textContent = invoiceData.productName || 'Product';
-                    document.getElementById('itemPlanName').textContent = invoiceData.plan || 'Standard';
-                    document.getElementById('itemPrice').textContent = price.toFixed(2);
-                    document.getElementById('subTotal').textContent = price.toFixed(2);
-                    document.getElementById('nairaTotal').textContent = naira.toLocaleString();
-                    document.getElementById('grandTotal').textContent = price.toFixed(2);
-
-                    // Screenshot
-                    if (invoiceData.screenshotUrl) {
-                        document.getElementById('invoiceScreenshot').src = invoiceData.screenshotUrl;
-                    } else {
-                        document.getElementById('screenshotSection').style.display = 'none';
-                    }
-
-                    console.log('✅ Invoice loaded:', invoiceData);
+                    loadingEl.style.display = 'none';
+                    invoiceEl.style.display = 'block';
 
                 } catch (error) {
                     console.error('❌ Error:', error);
+                    loadingEl.style.display = 'none';
+                    notFoundEl.style.display = 'block';
                 }
             }
 
-            loadInvoice();
+            // ============================================================
+            // ===== DISPLAY INVOICE DATA =====
+            // ============================================================
+            function displayInvoice(data) {
+                // Date
+                let dateStr = '--';
+                if (data.createdAt) {
+                    const d = data.createdAt.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+                    dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString();
+                }
+
+                const orderIdNum = data.orderId || 'N/A';
+                const price = data.price || 0;
+                const naira = data.nairaPrice || (price * 1440);
+                const status = data.status || 'pending';
+                const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+
+                // Fill fields
+                document.getElementById('invoiceId').textContent = 'INV-' + orderIdNum;
+                document.getElementById('invoiceDate').textContent = dateStr;
+
+                const statusEl = document.getElementById('invoiceStatus');
+                statusEl.textContent = statusText;
+                statusEl.className = 'status-badge status-' + status;
+
+                // Customer Info
+                const fieldLabel = data.userFieldLabel || 'Information';
+                document.getElementById('customerInfo').innerHTML =
+                    '<strong>' + fieldLabel + ':</strong> ' + (data.userInfo || 'N/A');
+
+                // Order Info
+                document.getElementById('orderId').textContent = orderIdNum;
+                document.getElementById('paymentMethod').textContent = data.paymentMethod || 'Crypto';
+                document.getElementById('currencyType').textContent = (data.currency || 'crypto').charAt(0).toUpperCase() + (data.currency || 'crypto').slice(1);
+
+                // Items
+                document.getElementById('itemProductName').textContent = data.productName || 'Product';
+                document.getElementById('itemPlanName').textContent = data.plan || 'Standard';
+                document.getElementById('itemPrice').textContent = price.toFixed(2);
+
+                // Total
+                document.getElementById('subTotal').textContent = price.toFixed(2);
+                document.getElementById('nairaTotal').textContent = naira.toLocaleString();
+                document.getElementById('grandTotal').textContent = price.toFixed(2);
+
+                console.log('✅ Invoice displayed');
+            }
 
             // ============================================================
-            // ===== PRINT =====
+            // ===== COPY INVOICE LINK =====
+            // ============================================================
+            window.copyInvoiceLink = function() {
+                const link = window.location.href;
+
+                const copyFn = () => {
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(link).then(() => {
+                            showCopyToast();
+                        }).catch(() => {
+                            fallbackCopy(link);
+                        });
+                    } else {
+                        fallbackCopy(link);
+                    }
+                };
+
+                const fallbackCopy = (text) => {
+                    const temp = document.createElement('textarea');
+                    temp.value = text;
+                    document.body.appendChild(temp);
+                    temp.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(temp);
+                    showCopyToast();
+                };
+
+                copyFn();
+            };
+
+            function showCopyToast() {
+                const toast = document.getElementById('copyToast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+
+            // ============================================================
+            // ===== PRINT INVOICE =====
             // ============================================================
             window.printInvoice = function() {
                 window.print();
@@ -498,6 +608,27 @@
 
                 html2pdf().set(opt).from(element).save();
             };
+
+            // ============================================================
+            // ===== THEME TOGGLE =====
+            // ============================================================
+            const themeToggle = document.getElementById('themeToggle');
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            themeToggle.innerHTML = savedTheme === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+
+            themeToggle.addEventListener('click', function() {
+                const current = document.documentElement.getAttribute('data-theme');
+                const next = current === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', next);
+                localStorage.setItem('theme', next);
+                themeToggle.innerHTML = next === 'dark' ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            });
+
+            // ============================================================
+            // ===== INIT =====
+            // ============================================================
+            loadInvoice();
         });
     </script>
 
