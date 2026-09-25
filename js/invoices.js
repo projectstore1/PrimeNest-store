@@ -193,8 +193,8 @@
                         <button class="action-btn btn-copy" data-action="copy" data-orderid="${orderId}">
                             <i class="fas fa-link"></i> Copy Link
                         </button>
-                        ${status !== 'delivered' ? `
-                            <button class="action-btn btn-delivered" data-action="status" data-status="delivered" data-id="${inv.docId}">
+                        ${status !== 'Completed' ? `
+                            <button class="action-btn btn-delivered" data-action="status" data-status="Completed" data-id="${inv.docId}">
                                 <i class="fas fa-check-circle"></i> Delivered
                             </button>
                         ` : ''}
@@ -422,7 +422,7 @@
                 userFieldLabel: 'User Info',
                 price: price,
                 nairaPrice: nairaPrice,
-                currency: 'crypto',
+                currency: 'crypto&naira',
                 paymentMethod: 'Admin Created',
                 status: status,
                 invoiceCreated: true,
@@ -444,7 +444,7 @@
                 userFieldLabel: 'User Info',
                 price: price,
                 nairaPrice: nairaPrice,
-                currency: 'crypto',
+                currency: 'crypto&naira',
                 paymentMethod: 'Admin Created',
                 status: status,
                 createdBy: 'admin',
