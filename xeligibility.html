@@ -10,16 +10,11 @@
        ROOT VARIABLES
        ============================================================ */
     :root {
-      /* Green */
       --green: #16a34a;
       --green-dark: #0d8a3a;
       --green-light: #dcfce7;
-      
-      /* Orange */
       --orange: #ea580c;
       --orange-light: #ffedd5;
-      
-      /* Gray */
       --gray-50: #f8fafc;
       --gray-100: #f1f5f9;
       --gray-200: #e2e8f0;
@@ -93,6 +88,15 @@
       justify-content: center;
       font-size: 1.2rem;
       font-weight: 800;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .store-name {
