@@ -4,189 +4,54 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>X Gift Eligibility Checker</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- আপনার existing CSS -->
+  <link rel="stylesheet" href="Assets/css/style.css">
+
+  <!-- Font Awesome (আপনার CSS-এ আইকন ব্যবহার হয়েছে) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
   <style>
     /* ============================================================
-       ROOT VARIABLES
+       X CHECKER — page-specific styles (আপনার CSS variables ব্যবহার)
        ============================================================ */
-    :root {
-      --green: #16a34a;
-      --green-dark: #0d8a3a;
-      --green-light: #dcfce7;
-      --orange: #ea580c;
-      --orange-light: #ffedd5;
-      --gray-50: #f8fafc;
-      --gray-100: #f1f5f9;
-      --gray-200: #e2e8f0;
-      --gray-300: #cbd5e1;
-      --gray-400: #94a3b8;
-      --gray-500: #64748b;
-      --gray-600: #475569;
-      --gray-700: #334155;
-      --gray-800: #1e293b;
-      --gray-900: #0f172a;
+
+    .xc-page {
+      padding: 30px 0 60px;
     }
 
-    /* ============================================================
-       BASE RESET
-       ============================================================ */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
-      min-height: 100vh;
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    code {
-      background: #f1f5f9;
-      padding: 2px 6px;
-      border-radius: 6px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.85em;
-      color: #16a34a;
-    }
-
-    /* ============================================================
-       HEADER
-       ============================================================ */
-    .app-header {
-      background: #ffffff;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 12px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-
-    .logo-area {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #16a34a, #0d8a3a);
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      font-weight: 800;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .logo-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .store-name {
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: #0f172a;
-      letter-spacing: -0.02em;
-    }
-
-    .store-name span {
-      color: #16a34a;
-    }
-
-    .nav-tabs {
-      display: flex;
-      gap: 6px;
-    }
-
-    .nav-tab {
-      padding: 8px 16px;
-      border-radius: 10px;
-      text-decoration: none;
-      color: #475569;
-      font-weight: 600;
-      font-size: 0.88rem;
-      transition: all 0.2s;
-    }
-
-    .nav-tab:hover {
-      background: #f1f5f9;
-      color: #0f172a;
-    }
-
-    .nav-tab.active {
-      background: #16a34a;
-      color: #ffffff;
-    }
-
-    /* ============================================================
-       CARD
-       ============================================================ */
-    .card {
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
-      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    }
-
-    /* ============================================================
-       X CHECKER PAGE STYLES
-       ============================================================ */
-    .xc-wrapper {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 30px 20px 60px;
-    }
-
-    /* HERO */
     .xc-hero {
-      background: linear-gradient(135deg, #16a34a, #0d8a3a);
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
       color: #ffffff;
-      border-radius: 22px;
-      padding: 30px 28px;
-      margin-bottom: 22px;
-      box-shadow: 0 20px 40px -14px rgba(22,163,74,0.45);
+      border-radius: 32px;
+      padding: 36px 32px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-hover);
       position: relative;
       overflow: hidden;
     }
     .xc-hero::before {
       content: '';
       position: absolute;
-      top: -60%; right: -20%;
-      width: 340px; height: 340px;
+      top: -60%; right: -15%;
+      width: 380px; height: 380px;
       background: radial-gradient(circle, rgba(255,255,255,0.16), transparent 70%);
       border-radius: 50%;
       pointer-events: none;
     }
     .xc-hero-icon {
-      width: 56px; height: 56px;
+      width: 60px; height: 60px;
       background: rgba(255,255,255,0.22);
       border: 2px solid rgba(255,255,255,0.45);
-      border-radius: 16px;
+      border-radius: 18px;
       display: flex; align-items: center; justify-content: center;
       font-size: 30px; font-weight: 800;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       backdrop-filter: blur(8px);
       position: relative; z-index: 1;
     }
     .xc-hero h1 {
-      font-size: 1.85rem;
+      font-size: 2rem;
       font-weight: 800;
       letter-spacing: -0.03em;
       line-height: 1.15;
@@ -194,52 +59,54 @@
       position: relative; z-index: 1;
     }
     .xc-hero p {
-      font-size: 0.98rem;
+      font-size: 1rem;
       opacity: 0.94;
-      max-width: 520px;
+      max-width: 540px;
       position: relative; z-index: 1;
     }
 
     /* INPUT ROW */
     .xc-input-row {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       flex-wrap: wrap;
     }
     .xc-input-row input {
       flex: 1;
-      min-width: 200px;
-      padding: 13px 16px;
-      border-radius: 12px;
-      border: 1.5px solid #e2e8f0;
+      min-width: 220px;
+      padding: 14px 18px;
+      border-radius: 16px;
+      border: 2px solid var(--border-color);
+      background: var(--input-bg);
+      color: var(--text-primary);
       font-family: inherit;
-      font-size: 0.98rem;
-      transition: border 0.2s, box-shadow 0.2s;
-      background: #fff;
-      color: #0f172a;
+      font-size: 1rem;
+      transition: all 0.2s;
     }
     .xc-input-row input:focus {
       outline: none;
-      border-color: #16a34a;
-      box-shadow: 0 0 0 4px rgba(22,163,74,0.12);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
     }
     .xc-input-row button {
       flex: 0 0 auto;
-      padding: 13px 26px;
-      border-radius: 12px;
+      padding: 14px 28px;
+      border-radius: 60px;
       border: none;
-      background: #16a34a;
-      color: #fff;
+      background: var(--accent);
+      color: #ffffff;
       font-weight: 700;
       font-size: 0.95rem;
       cursor: pointer;
       font-family: inherit;
       transition: all 0.2s;
-      box-shadow: 0 10px 22px -10px rgba(22,163,74,0.55);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
     .xc-input-row button:hover:not(:disabled) {
-      background: #0d8a3a;
-      transform: translateY(-1px);
+      background: var(--accent-hover);
+      transform: scale(1.03);
     }
     .xc-input-row button:disabled {
       opacity: 0.6;
@@ -250,48 +117,60 @@
     .xc-banner {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 18px 20px;
-      border-radius: 16px;
+      gap: 16px;
+      padding: 20px 22px;
+      border-radius: 20px;
       font-weight: 700;
       margin-bottom: 16px;
     }
     .xc-banner-icon {
-      width: 52px; height: 52px;
+      width: 56px; height: 56px;
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-size: 26px; font-weight: 800;
+      color: #ffffff; font-size: 26px; font-weight: 800;
       flex-shrink: 0;
     }
     .xc-banner-main {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       font-weight: 800;
       letter-spacing: -0.01em;
     }
     .xc-banner-sub {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       font-weight: 500;
-      opacity: 0.85;
-      margin-top: 2px;
+      opacity: 0.9;
+      margin-top: 3px;
     }
     .xc-banner.eligible {
       background: #dcfce7;
-      border: 2px solid #16a34a;
+      border: 2px solid var(--success);
       color: #166534;
     }
-    .xc-banner.eligible .xc-banner-icon { background: #16a34a; }
+    [data-theme="dark"] .xc-banner.eligible {
+      background: #14532d;
+      color: #dcfce7;
+    }
+    .xc-banner.eligible .xc-banner-icon { background: var(--success); }
 
     .xc-banner.not-eligible {
-      background: #ffedd5;
-      border: 2px solid #ea580c;
-      color: #9a3d00;
+      background: #fef3c7;
+      border: 2px solid #f59e0b;
+      color: #92400e;
     }
-    .xc-banner.not-eligible .xc-banner-icon { background: #ea580c; }
+    [data-theme="dark"] .xc-banner.not-eligible {
+      background: #78350f;
+      color: #fef3c7;
+    }
+    .xc-banner.not-eligible .xc-banner-icon { background: #f59e0b; }
 
     .xc-banner.error {
       background: #fee2e2;
       border: 2px solid #ef4444;
       color: #991b1b;
+    }
+    [data-theme="dark"] .xc-banner.error {
+      background: #7f1d1d;
+      color: #fecaca;
     }
     .xc-banner.error .xc-banner-icon { background: #ef4444; }
 
@@ -300,17 +179,18 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 12px;
-      padding: 24px;
-      background: #f1f5f9;
-      border-radius: 14px;
-      color: #475569;
+      gap: 14px;
+      padding: 28px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--text-secondary);
       font-weight: 500;
     }
     .xc-spinner {
-      width: 20px; height: 20px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #16a34a;
+      width: 22px; height: 22px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--accent);
       border-radius: 50%;
       animation: xc-spin 0.8s linear infinite;
     }
@@ -320,19 +200,20 @@
     .xc-profile {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding: 16px 18px;
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 16px;
+      gap: 16px;
+      padding: 18px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       margin-bottom: 16px;
+      box-shadow: var(--shadow);
     }
     .xc-avatar {
-      width: 56px; height: 56px;
+      width: 60px; height: 60px;
       border-radius: 50%;
-      background: linear-gradient(135deg, #16a34a, #0d8a3a);
+      background: linear-gradient(135deg, var(--accent), var(--accent-hover));
       display: flex; align-items: center; justify-content: center;
-      color: #fff; font-weight: 800; font-size: 22px;
+      color: #ffffff; font-weight: 800; font-size: 24px;
       flex-shrink: 0;
       overflow: hidden;
     }
@@ -342,176 +223,163 @@
     .xc-profile-info { flex: 1; min-width: 0; }
     .xc-profile-name {
       font-weight: 700;
-      font-size: 1rem;
-      color: #0f172a;
+      font-size: 1.05rem;
+      color: var(--text-primary);
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
     .xc-profile-handle {
-      font-size: 0.85rem;
-      color: #475569;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
     }
 
     /* INFO TABLE */
     .xc-info-table {
-      background: #fff;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       overflow: hidden;
       margin-top: 16px;
+      box-shadow: var(--shadow);
     }
     .xc-info-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 18px;
-      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-color);
       gap: 16px;
     }
     .xc-info-row:last-child { border-bottom: none; }
-    .xc-info-row.highlight { background: #dcfce7; }
-    .xc-info-row.reason { background: #ffedd5; }
+    .xc-info-row.highlight { background: var(--notice-bg); }
     .xc-info-label {
       font-size: 0.78rem;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       font-weight: 700;
-      color: #475569;
+      color: var(--text-muted);
     }
     .xc-info-value {
       font-size: 0.95rem;
       font-weight: 600;
-      color: #0f172a;
+      color: var(--text-primary);
       text-align: right;
       word-break: break-word;
     }
-    .xc-info-row.highlight .xc-info-value { color: #16a34a; }
-    .xc-info-row.reason .xc-info-value { color: #ea580c; }
+    .xc-info-row.highlight .xc-info-value { color: var(--accent); }
 
     /* ORDER NOW BUTTON */
     .xc-order-btn {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       width: 100%;
-      padding: 18px 24px;
-      margin-top: 20px;
-      border-radius: 16px;
+      padding: 20px 28px;
+      margin-top: 22px;
+      border-radius: 60px;
       border: none;
-      background: linear-gradient(135deg, #16a34a, #0d8a3a);
+      background: linear-gradient(135deg, var(--success), #16a34a);
       color: #ffffff;
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       font-weight: 800;
       letter-spacing: 0.01em;
       cursor: pointer;
       text-decoration: none;
       font-family: inherit;
-      box-shadow: 0 16px 32px -12px rgba(22,163,74,0.55);
+      box-shadow: 0 16px 32px -12px rgba(34,197,94,0.55);
       transition: transform 0.2s, box-shadow 0.2s;
       animation: xc-pulse 2s ease-in-out infinite;
     }
     .xc-order-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 20px 40px -12px rgba(22,163,74,0.65);
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 20px 40px -12px rgba(34,197,94,0.65);
     }
     @keyframes xc-pulse {
-      0%, 100% { box-shadow: 0 16px 32px -12px rgba(22,163,74,0.55); }
-      50% { box-shadow: 0 16px 40px -8px rgba(22,163,74,0.75); }
+      0%, 100% { box-shadow: 0 16px 32px -12px rgba(34,197,94,0.55); }
+      50% { box-shadow: 0 16px 40px -8px rgba(34,197,94,0.75); }
     }
 
     /* TIPS */
     .xc-tips {
-      margin-top: 22px;
-      background: #f1f5f9;
-      border-radius: 14px;
-      padding: 18px 20px;
-      border-left: 4px solid #ea580c;
+      margin-top: 24px;
+      background: var(--notice-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 20px 22px;
+      border-left: 4px solid var(--accent);
     }
     .xc-tips h4 {
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: #ea580c;
-      margin-bottom: 10px;
+      color: var(--accent);
+      margin-bottom: 12px;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .xc-tips ul {
-      padding-left: 18px;
-      font-size: 0.88rem;
-      color: #475569;
-      line-height: 1.7;
+      padding-left: 20px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
     }
     .xc-tips li { margin-bottom: 4px; }
 
-    /* FOOTER */
-    .xc-footer {
-      text-align: center;
-      padding: 24px 12px 8px;
-      font-size: 0.85rem;
-      color: #475569;
-    }
-    .xc-footer strong { color: #ea580c; font-weight: 700; }
-
-    /* ============================================================
-       RESPONSIVE
-       ============================================================ */
+    /* RESPONSIVE */
     @media (max-width: 640px) {
-      .app-header {
-        padding: 10px 14px;
-      }
-      .store-name {
-        font-size: 0.8rem;
-      }
-      .nav-tab {
-        padding: 6px 12px;
-        font-size: 0.8rem;
-      }
-      .xc-wrapper { padding: 20px 14px 40px; }
-      .xc-hero { padding: 22px 20px; }
-      .xc-hero h1 { font-size: 1.5rem; }
+      .xc-hero { padding: 26px 22px; border-radius: 24px; }
+      .xc-hero h1 { font-size: 1.55rem; }
       .xc-input-row button { width: 100%; justify-content: center; }
-      .xc-profile-name { font-size: 0.95rem; }
-      .xc-info-row { padding: 10px 14px; }
+      .xc-profile-name { font-size: 0.98rem; }
+      .xc-info-row { padding: 12px 16px; }
       .xc-info-value { font-size: 0.88rem; }
-      .xc-order-btn { font-size: 1rem; padding: 16px 20px; }
+      .xc-order-btn { font-size: 1rem; padding: 16px 22px; }
     }
   </style>
 </head>
 <body>
 
   <!-- ================= HEADER ================= -->
-  <header class="app-header">
-    <div class="logo-area">
-      <div class="logo-icon" id="headerLogo">A</div>
-      <div>
-        <div class="store-name">ABDULLAH <span>DIGITAL</span> STORE</div>
-        <div style="font-size:0.7rem;color:#475569;">X Gift Eligibility Checker</div>
-      </div>
+  <header class="header">
+    <div class="container">
+      <a href="index.html" class="logo" style="text-decoration:none;">
+        <img src="https://www.image2url.com/r2/default/images/1786765708686-cd1cda4a-588e-9768-20204165b150.jpg"
+             alt="Logo" id="headerLogo">
+        <span>ABDULLAH <span style="color:var(--accent);">DIGITAL</span> STORE</span>
+      </a>
+      <nav class="nav">
+        <a href="index.html">
+          <i class="fa-solid fa-house"></i> Home
+        </a>
+        <a href="x-checker.html" class="active">
+          <i class="fa-brands fa-x-twitter"></i> X Checker
+        </a>
+      </nav>
     </div>
-    <nav class="nav-tabs">
-      <a href="index.html" class="nav-tab">Home</a>
-      <a href="x-checker.html" class="nav-tab active">X Checker</a>
-    </nav>
   </header>
 
   <!-- ================= MAIN ================= -->
-  <div class="xc-wrapper">
+  <main class="container xc-page">
 
     <!-- HERO -->
     <div class="xc-hero">
-      <div class="xc-hero-icon">𝕏</div>
+      <div class="xc-hero-icon">
+        <i class="fa-brands fa-x-twitter"></i>
+      </div>
       <h1>X Gift Eligibility Checker</h1>
       <p>Enter an X (Twitter) username to instantly check if that account is eligible to receive gifts.</p>
     </div>
 
     <!-- CHECKER CARD -->
-    <div class="card" style="padding:26px;">
-      <h3 style="font-size:1.05rem;font-weight:700;color:#0f172a;margin-bottom:6px;">
+    <div class="card" style="padding:28px;border-radius:24px;">
+      <h3 style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:6px;">
         Check Eligibility
       </h3>
-      <p style="font-size:0.85rem;color:#475569;margin-bottom:16px;">
+      <p style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:18px;">
         Example: <code>@username</code> or <code>x.com/username</code>
       </p>
 
@@ -523,16 +391,16 @@
           autocomplete="off"
           spellcheck="false">
         <button id="checkBtn">
-          🔍 Check Eligibility
+          <i class="fa-solid fa-magnifying-glass"></i> Check Eligibility
         </button>
       </div>
 
-      <div id="result" style="margin-top:20px;"></div>
+      <div id="result" style="margin-top:22px;"></div>
     </div>
 
     <!-- TIPS -->
     <div class="xc-tips">
-      <h4>💡 Tips</h4>
+      <h4><i class="fa-solid fa-lightbulb"></i> Tips</h4>
       <ul>
         <li>Enter only the username (with or without @).</li>
         <li>Profile must be public and active.</li>
@@ -541,15 +409,19 @@
       </ul>
     </div>
 
-    <!-- FOOTER -->
-    <div class="xc-footer">
-      Developed by <strong>MD ABDULLAH KHAN</strong>
-    </div>
+  </main>
 
-  </div>
+  <!-- ================= FOOTER ================= -->
+  <footer class="footer">
+    <div class="container">
+      <p>
+        <i class="fa-solid fa-code"></i>
+        Developed by <strong>MD ABDULLAH KHAN</strong>
+      </p>
+    </div>
+  </footer>
 
   <!-- ================= SCRIPT ================= -->
-  <script src="js/x-checker.js"></script>
-
+  <script src="x-checker.js"></script>
 </body>
 </html>
