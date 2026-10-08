@@ -2,6 +2,35 @@
 (function(){
   'use strict';
 
+  // ============================================================
+  //  THEME TOGGLE (sync with your main site)
+  // ============================================================
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
+  function updateThemeIcon(){
+    if (!themeToggle) return;
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    themeToggle.innerHTML = isDark
+      ? '<i class="fa-solid fa-sun"></i>'
+      : '<i class="fa-solid fa-moon"></i>';
+  }
+
+  if (themeToggle){
+    updateThemeIcon();
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      updateThemeIcon();
+    });
+  }
+
+  // ============================================================
+  //  ELEMENTS
+  // ============================================================
   const inputEl  = document.getElementById('username');
   const btnEl    = document.getElementById('checkBtn');
   const resultEl = document.getElementById('result');
@@ -18,7 +47,9 @@
 
   btnEl.addEventListener('click', checkGift);
 
-  // ---------- helpers ----------
+  // ============================================================
+  //  HELPERS
+  // ============================================================
   function cleanHandle(raw){
     if (!raw) return '';
     let s = raw.trim();
@@ -40,12 +71,16 @@
   }
 
   function buildBanner(type, mainText, subText){
-    const icon = type === 'eligible' ? '<i class="fa-solid fa-check"></i>'
-               : type === 'not-eligible' ? '<i class="fa-solid fa-xmark"></i>'
-               : '<i class="fa-solid fa-triangle-exclamation"></i>';
+    const icon = type === 'eligible'
+      ? '<i class="fa-solid fa-check"></i>'
+      : type === 'not-eligible'
+      ? '<i class="fa-solid fa-xmark"></i>'
+      : '<i class="fa-solid fa-triangle-exclamation"></i>';
+
     const cls = type === 'eligible' ? 'eligible'
               : type === 'not-eligible' ? 'not-eligible'
               : 'error';
+
     return `
       <div class="xc-banner ${cls}">
         <div class="xc-banner-icon">${icon}</div>
@@ -72,10 +107,12 @@
     const name = profile?.name || 'Unknown';
     const screenName = profile?.screenName || fallbackHandle || 'unknown';
     const initial = (name || 'U').charAt(0).toUpperCase();
+
     const avatar = profile?.profileImageUrl
       ? `<img src="${esc(profile.profileImageUrl)}" alt="avatar"
               onerror="this.parentNode.textContent='${esc(initial)}';">`
       : esc(initial);
+
     return `
       <div class="xc-profile">
         <div class="xc-avatar">${avatar}</div>
@@ -86,7 +123,9 @@
       </div>`;
   }
 
-  // ---------- main ----------
+  // ============================================================
+  //  MAIN
+  // ============================================================
   async function checkGift(){
     const raw = inputEl.value.trim();
     const handle = cleanHandle(raw);
@@ -113,7 +152,7 @@
 
       let data;
       try { data = await res.json(); }
-      catch (e) {
+      catch (e){
         resultEl.innerHTML = buildBanner('error', 'Invalid response', 'Server returned an invalid response.');
         return;
       }
@@ -148,11 +187,12 @@
         { label: 'ID',       value: profile.id         || 'N/A' }
       ]);
 
-      // Eligible → Order Now button → home page
+      // Eligible → Order Now → home page
       if (isEligible){
         html += `
           <a href="index.html" class="xc-order-btn">
-            <i class="fa-solid fa-cart-shopping"></i> Order Now
+            <i class="fa-solid fa-cart-shopping"></i>
+            Order Now
           </a>`;
       }
 
