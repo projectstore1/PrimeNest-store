@@ -8,15 +8,15 @@
   <!-- আপনার existing CSS -->
   <link rel="stylesheet" href="Assets/css/style.css">
 
-  <!-- Font Awesome (আপনার site-এ ব্যবহার হয়) -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
     /* ============================================================
-       X CHECKER — page-specific styles (আপনার CSS variables)
+       X CHECKER — page-specific styles
        ============================================================ */
 
-    /* HERO BANNER (আপনার .banner-slider এর মতো) */
+    /* HERO BANNER — with background image */
     .xc-hero {
       background: linear-gradient(135deg, var(--accent), var(--accent-hover));
       color: #fff;
@@ -27,15 +27,27 @@
       position: relative;
       overflow: hidden;
       text-align: center;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .xc-hero::before {
       content: '';
       position: absolute;
-      top: -50%; right: -10%;
-      width: 380px; height: 380px;
-      background: radial-gradient(circle, rgba(255,255,255,0.14), transparent 70%);
-      border-radius: 50%;
+      inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(37,99,235,0.75),
+        rgba(29,78,216,0.7)
+      );
+      border-radius: 28px;
       pointer-events: none;
+      z-index: 0;
     }
     .xc-hero-icon {
       width: 68px; height: 68px;
@@ -54,6 +66,7 @@
       letter-spacing: -0.02em;
       margin-bottom: 8px;
       position: relative; z-index: 1;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.35);
     }
     .xc-hero p {
       font-size: 1rem;
@@ -61,9 +74,10 @@
       max-width: 540px;
       margin: 0 auto;
       position: relative; z-index: 1;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
 
-    /* CHECKER CARD — আপনার .card/.payment-container style */
+    /* CHECKER CARD */
     .xc-card {
       background: var(--bg-secondary);
       border-radius: 32px;
@@ -141,7 +155,7 @@
       cursor: not-allowed;
     }
 
-    /* RESULT BANNER */
+    /* BANNERS */
     .xc-banner {
       display: flex;
       align-items: center;
@@ -244,9 +258,11 @@
       color: #fff; font-weight: 700; font-size: 24px;
       flex-shrink: 0;
       overflow: hidden;
+      position: relative;
     }
     .xc-avatar img {
       width: 100%; height: 100%; object-fit: cover;
+      display: block;
     }
     .xc-profile-info { flex: 1; min-width: 0; }
     .xc-profile-name {
@@ -297,7 +313,7 @@
     }
     .xc-info-row.highlight .xc-info-value { color: var(--accent); }
 
-    /* ORDER NOW BUTTON */
+    /* ORDER NOW */
     .xc-order-btn {
       display: flex;
       align-items: center;
@@ -312,7 +328,6 @@
       color: #fff;
       font-size: 1.1rem;
       font-weight: 700;
-      letter-spacing: 0.01em;
       cursor: pointer;
       text-decoration: none;
       font-family: inherit;
@@ -354,7 +369,7 @@
 
     /* RESPONSIVE */
     @media (max-width: 640px) {
-      .xc-hero { padding: 28px 22px; border-radius: 20px; }
+      .xc-hero { padding: 28px 22px; border-radius: 20px; min-height: 180px; }
       .xc-hero h1 { font-size: 1.55rem; }
       .xc-hero-icon { width: 58px; height: 58px; font-size: 26px; }
       .xc-card { padding: 22px; border-radius: 24px; }
@@ -368,12 +383,12 @@
 </head>
 <body>
 
-  <!-- ================= THEME TOGGLE (same as your site) ================= -->
+  <!-- ================= THEME TOGGLE ================= -->
   <div class="theme-toggle" id="themeToggle" title="Toggle theme">
     <i class="fa-solid fa-moon"></i>
   </div>
 
-  <!-- ================= HEADER (same structure as your site) ================= -->
+  <!-- ================= HEADER ================= -->
   <header class="header">
     <div class="container">
       <a href="index.html" class="logo" style="text-decoration:none;">
@@ -398,8 +413,8 @@
   <!-- ================= MAIN ================= -->
   <main class="container">
 
-    <!-- HERO -->
-    <div class="xc-hero">
+    <!-- HERO / BANNER -->
+    <div class="xc-hero" id="heroBanner">
       <div class="xc-hero-icon">
         <i class="fa-brands fa-x-twitter"></i>
       </div>
@@ -443,7 +458,7 @@
 
   </main>
 
-  <!-- ================= FOOTER (same as your site) ================= -->
+  <!-- ================= FOOTER ================= -->
   <footer class="footer">
     <div class="container">
       <p>
