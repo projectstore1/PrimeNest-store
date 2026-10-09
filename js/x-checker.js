@@ -6,12 +6,8 @@
   //  ⚙️ CONFIG — এখানে আপনার banner image link বসান
   // ============================================================
   const CONFIG = {
-    // 🖼️ Banner image URL (hero section-এ background হিসেবে দেখাবে)
-    // খালি রাখলে ডিফল্ট নীল gradient দেখাবে
-    BANNER_URL: "https://plain-apac-prod-public.komododecks.com/202610/09/fh9ppEP84bJyDVLjyamd/image.png",
-
-    // 🖼️ Fallback avatar (যদি Twitter থেকে photo load না হয়)
-    FALLBACK_AVATAR: "" // খালি রাখলে initial letter দেখাবে
+    // 🖼️ Banner image URL — খালি রাখলে banner দেখাবে না
+    BANNER_URL: "https://plain-apac-prod-public.komododecks.com/202610/09/fh9ppEP84bJyDVLjyamd/image.png"
   };
 
   // ============================================================
@@ -25,6 +21,9 @@
       hero.style.backgroundImage = `url('${CONFIG.BANNER_URL}')`;
       hero.style.backgroundSize = 'cover';
       hero.style.backgroundPosition = 'center';
+      hero.style.display = 'block';
+    } else {
+      hero.style.display = 'none';
     }
   }
 
@@ -95,21 +94,17 @@
       .replace(/'/g, '&#39;');
   }
 
-  // 🖼️ Build avatar URL from multiple sources
+  // Build avatar URL from multiple sources
   function buildAvatarUrl(profile, handle){
-    // 1. API থেকে profileImageUrl এলে
     if (profile?.profileImageUrl){
-      // Twitter URL গুলো _normal থেকে _400x400 করা ভালো
       return profile.profileImageUrl
         .replace('_normal.', '_400x400.')
         .replace('_bigger.', '_400x400.');
     }
-    // 2. API থেকে avatar / profile_image_url এলে
     if (profile?.avatar) return profile.avatar;
-    if (profile?.profile_image_url) {
+    if (profile?.profile_image_url){
       return profile.profile_image_url.replace('_normal.', '_400x400.');
     }
-    // 3. Fallback: unavatar.io service (Twitter avatar pull করে)
     if (handle){
       return `https://unavatar.io/twitter/${encodeURIComponent(handle)}`;
     }
@@ -149,7 +144,6 @@
       </div>`;
   }
 
-  // 🖼️ PROFILE CARD with working avatar
   function buildProfileCard(profile, handle){
     const name = profile?.name || 'Unknown';
     const screenName = profile?.screenName || handle || 'unknown';
@@ -157,28 +151,13 @@
     const avatarUrl = buildAvatarUrl(profile, handle);
 
     let avatarHTML;
-
     if (avatarUrl){
-      // Image with multi-level fallback
       avatarHTML = `
         <img
           src="${esc(avatarUrl)}"
           alt="${esc(name)}"
-          onerror="
-            this.onerror=null;
-            this.src='https://unavatar.io/twitter/${esc(handle)}';
-          "
-          data-fallback="1">
+          onerror="this.onerror=null; this.src='https://unavatar.io/twitter/${esc(handle)}';">
       `;
-      // Additional fallback if even unavatar fails
-      setTimeout(() => {
-        const img = document.querySelector('.xc-avatar img[data-fallback="1"]');
-        if (img && (img.naturalWidth === 0 || img.complete === false)){
-          img.onerror = function(){
-            this.parentNode.textContent = '${esc(initial)}';
-          };
-        }
-      }, 500);
     } else {
       avatarHTML = esc(initial);
     }
