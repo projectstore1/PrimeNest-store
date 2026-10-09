@@ -8,7 +8,7 @@
   const CONFIG = {
     // 🖼️ Banner image URL (hero section-এ background হিসেবে দেখাবে)
     // খালি রাখলে ডিফল্ট নীল gradient দেখাবে
-    BANNER_URL: "",
+    BANNER_URL: "https://plain-apac-prod-public.komododecks.com/202610/09/fh9ppEP84bJyDVLjyamd/image.png",
 
     // 🖼️ Fallback avatar (যদি Twitter থেকে photo load না হয়)
     FALLBACK_AVATAR: "" // খালি রাখলে initial letter দেখাবে
