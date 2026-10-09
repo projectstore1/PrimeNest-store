@@ -3,7 +3,33 @@
   'use strict';
 
   // ============================================================
-  //  THEME TOGGLE (sync with your main site)
+  //  ⚙️ CONFIG — এখানে আপনার banner image link বসান
+  // ============================================================
+  const CONFIG = {
+    // 🖼️ Banner image URL (hero section-এ background হিসেবে দেখাবে)
+    // খালি রাখলে ডিফল্ট নীল gradient দেখাবে
+    BANNER_URL: "",
+
+    // 🖼️ Fallback avatar (যদি Twitter থেকে photo load না হয়)
+    FALLBACK_AVATAR: "" // খালি রাখলে initial letter দেখাবে
+  };
+
+  // ============================================================
+  //  APPLY BANNER
+  // ============================================================
+  function applyBanner(){
+    const hero = document.getElementById('heroBanner');
+    if (!hero) return;
+
+    if (CONFIG.BANNER_URL && CONFIG.BANNER_URL.trim()){
+      hero.style.backgroundImage = `url('${CONFIG.BANNER_URL}')`;
+      hero.style.backgroundSize = 'cover';
+      hero.style.backgroundPosition = 'center';
+    }
+  }
+
+  // ============================================================
+  //  THEME TOGGLE
   // ============================================================
   const themeToggle = document.getElementById('themeToggle');
   const savedTheme = localStorage.getItem('theme') || 'light';
@@ -40,7 +66,6 @@
     return;
   }
 
-  // Enter key triggers check
   inputEl.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') checkGift();
   });
@@ -68,6 +93,27 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  }
+
+  // 🖼️ Build avatar URL from multiple sources
+  function buildAvatarUrl(profile, handle){
+    // 1. API থেকে profileImageUrl এলে
+    if (profile?.profileImageUrl){
+      // Twitter URL গুলো _normal থেকে _400x400 করা ভালো
+      return profile.profileImageUrl
+        .replace('_normal.', '_400x400.')
+        .replace('_bigger.', '_400x400.');
+    }
+    // 2. API থেকে avatar / profile_image_url এলে
+    if (profile?.avatar) return profile.avatar;
+    if (profile?.profile_image_url) {
+      return profile.profile_image_url.replace('_normal.', '_400x400.');
+    }
+    // 3. Fallback: unavatar.io service (Twitter avatar pull করে)
+    if (handle){
+      return `https://unavatar.io/twitter/${encodeURIComponent(handle)}`;
+    }
+    return '';
   }
 
   function buildBanner(type, mainText, subText){
@@ -103,19 +149,43 @@
       </div>`;
   }
 
-  function buildProfileCard(profile, fallbackHandle){
+  // 🖼️ PROFILE CARD with working avatar
+  function buildProfileCard(profile, handle){
     const name = profile?.name || 'Unknown';
-    const screenName = profile?.screenName || fallbackHandle || 'unknown';
+    const screenName = profile?.screenName || handle || 'unknown';
     const initial = (name || 'U').charAt(0).toUpperCase();
+    const avatarUrl = buildAvatarUrl(profile, handle);
 
-    const avatar = profile?.profileImageUrl
-      ? `<img src="${esc(profile.profileImageUrl)}" alt="avatar"
-              onerror="this.parentNode.textContent='${esc(initial)}';">`
-      : esc(initial);
+    let avatarHTML;
+
+    if (avatarUrl){
+      // Image with multi-level fallback
+      avatarHTML = `
+        <img
+          src="${esc(avatarUrl)}"
+          alt="${esc(name)}"
+          onerror="
+            this.onerror=null;
+            this.src='https://unavatar.io/twitter/${esc(handle)}';
+          "
+          data-fallback="1">
+      `;
+      // Additional fallback if even unavatar fails
+      setTimeout(() => {
+        const img = document.querySelector('.xc-avatar img[data-fallback="1"]');
+        if (img && (img.naturalWidth === 0 || img.complete === false)){
+          img.onerror = function(){
+            this.parentNode.textContent = '${esc(initial)}';
+          };
+        }
+      }, 500);
+    } else {
+      avatarHTML = esc(initial);
+    }
 
     return `
       <div class="xc-profile">
-        <div class="xc-avatar">${avatar}</div>
+        <div class="xc-avatar">${avatarHTML}</div>
         <div class="xc-profile-info">
           <div class="xc-profile-name">${esc(name)}</div>
           <div class="xc-profile-handle">@${esc(screenName)}</div>
@@ -136,7 +206,6 @@
       return;
     }
 
-    // Loading
     btnEl.disabled = true;
     btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
     resultEl.innerHTML = `
@@ -187,7 +256,6 @@
         { label: 'ID',       value: profile.id         || 'N/A' }
       ]);
 
-      // Eligible → Order Now → home page
       if (isEligible){
         html += `
           <a href="index.html" class="xc-order-btn">
@@ -209,5 +277,9 @@
     }
   }
 
+  // ============================================================
+  //  INIT
+  // ============================================================
+  applyBanner();
   window.checkGift = checkGift;
 })();
